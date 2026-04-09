@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+.Python
+venv/
+
+#Database
+/data/rogue_ap.db
+
+#Environment
+.env
+.env.example
