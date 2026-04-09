@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RogueShield — Reports</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#1E1E1E;--surface:#2D2D2D;--surface2:#3D3D3D;--surface3:#4A4A4A;--border:#404040;--accent:#4EC9B0;--accent-light:#6EE7D0;--safe:#4EC9B0;--suspicious:#CE9178;--rogue:#F44747;--text:#E0E0E0;--text2:#A0A0A0;--muted:#6B6B6B;--radius:10px;--shadow:0 2px 8px rgba(0,0,0,0.3);--sidebar-w:240px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-brand{padding:20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#4EC9B0,#2E8B7A);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{font-weight:700;font-size:18px}
+.logo-text span{color:var(--accent)}
+.sidebar-nav{flex:1;padding:16px 12px}
+.nav-section{margin-bottom:20px}
+.nav-section-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;padding:0 12px;margin-bottom:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text2);font-size:13.5px;font-weight:500;transition:all .15s;text-decoration:none;margin-bottom:2px}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(78,201,176,0.1);color:var(--accent);border:1px solid rgba(78,201,176,0.2)}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.user-avatar{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:600;font-size:13px;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:11px;color:var(--muted)}
+.logout-btn{width:28px;height:28px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s}
+.logout-btn:hover{background:rgba(244,71,71,0.2);border-color:var(--rogue);color:var(--rogue)}
+
+.main{margin-left:var(--sidebar-w);flex:1;padding:32px;max-width:1200px}
+.page-header{margin-bottom:28px}
+.page-title{font-size:28px;font-weight:700}
+.page-subtitle{font-size:14px;color:var(--muted);margin-top:4px}
+
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:24px}
+.card-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:15px;font-weight:600}
+.card-subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+.card-body{padding:24px}
+
+.current-card{background:linear-gradient(135deg,#4EC9B0,#2E8B7A);border-radius:var(--radius);padding:24px;margin-bottom:24px;color:var(--bg)}
+.current-card h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.current-card p{font-size:12.5px;opacity:.8;margin-bottom:18px}
+.dl-row{display:flex;gap:12px;flex-wrap:wrap}
+.btn-white{background:white;color:#1E1E1E;border:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.btn-outline{background:transparent;color:white;border:1.5px solid rgba(255,255,255,0.5);padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s}
+.btn-outline:hover{background:rgba(255,255,255,0.15);border-color:white}
+
+.scan-list{display:flex;flex-direction:column;gap:12px}
+.scan-item{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);transition:all .2s}
+.scan-item:hover{border-color:var(--accent)}
+.scan-icon{font-size:24px}
+.scan-info{flex:1;min-width:0}
+.scan-time{font-size:12px;color:var(--muted);margin-bottom:2px}
+.scan-files{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scan-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.scan-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-r{background:rgba(244,71,71,0.15);color:var(--rogue);border:1px solid rgba(244,71,71,0.3)}
+.badge-s{background:rgba(206,145,120,0.15);color:var(--suspicious);border:1px solid rgba(206,145,120,0.3)}
+.badge-f{background:rgba(78,201,176,0.15);color:var(--safe);border:1px solid rgba(78,201,176,0.3)}
+.scan-actions{display:flex;gap:8px;flex-shrink:0}
+.dl-btn{padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface3);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+.dl-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.empty{text-align:center;padding:48px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-weight:500;font-size:13px;cursor:pointer;border:none;transition:all .2s;text-decoration:none}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--surface3)}
+.btn-sm{padding:6px 10px;font-size:12px}
+
+.loading{position:fixed;inset:0;background:rgba(30,30,30,0.95);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px}
+.loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--text2)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-icon">🛡</div>
+      <div class="logo-text">Rogue<span>Shield</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="index.html" class="nav-item">Dashboard</a>
+        <a href="demo.html" class="nav-item">Demo</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Analysis</div>
+        <a href="scan.html" class="nav-item">Scan</a>
+        <a href="history.html" class="nav-item">History</a>
+        <a href="results.html" class="nav-item">Results</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="whitelist.html" class="nav-item">Access Points</a>
+        <a href="reports.html" class="nav-item active">Reports</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+        <button class="logout-btn" onclick="logout()">↩</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="page-title">Reports</div>
+      <div class="page-subtitle">Download PDF and CSV reports for your scans</div>
+    </div>
+
+    <div id="currentCard" class="current-card hidden">
+      <h2>📊 Current Scan</h2>
+      <p id="currentMeta">—</p>
+      <div class="dl-row">
+        <button class="btn-white" id="pdfBtn" onclick="dlPDF(currentScanId)">📄 Download PDF Report</button>
+        <button class="btn-outline" id="csvBtn" onclick="dlCSV(currentScanId)">📊 Download CSV Findings</button>
+      </div>
+    </div>
+
+    <div id="noCurrent" class="card">
+      <div class="card-body" style="text-align:center;padding:32px">
+        <div style="font-size:48px;margin-bottom:12px">📡</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:8px">No current scan selected</div>
+        <div style="color:var(--muted);margin-bottom:16px">Run a scan to generate reports</div>
+        <a href="scan.html" class="btn btn-secondary">New Scan</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">All Scan Reports</div>
+          <div class="card-subtitle">Download reports for any previous scan</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="loadHistory()">↻ Refresh</button>
+      </div>
+      <div class="card-body">
+        <div id="histList"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Loading...</div></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="loading hidden" id="loading"><div class="loading-spinner"></div><div class="loading-text" id="loadingText">Processing...</div></div>
+
+<script>
+let currentScanId=null;
+const api=(path,opts={})=>{const method=opts.method||'GET';const body=opts.body?JSON.stringify(opts.body):undefined;return fetch(path,{method,headers:{'Content-Type':'application/json',...opts.headers},credentials:'include',body}).then(async r=>{const t=await r.text();try{return JSON.parse(t)}catch{return{error:t}}})};
+(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;currentScanId=sessionStorage.getItem('currentScanId');if(currentScanId){showLoading(true,'');try{const res=await api(`/api/history/${currentScanId}`);if(res&&!res.error){document.getElementById('currentMeta').textContent=`${new Date(res.timestamp).toLocaleString()} · ${res.source_files.join(', ')} · ${res.stats.rogue_count} Rogue · ${res.stats.suspicious_count} Suspicious`;document.getElementById('currentCard').classList.remove('hidden');document.getElementById('noCurrent').style.display='none';}}finally{showLoading(false);}}loadHistory();})();
+function logout(){api('/api/logout',{method:'POST'});window.location.href='/login.html';}
+
+async function loadHistory(){try{const scans=await api('/api/history');const el=document.getElementById('histList');if(!scans||!scans.length){el.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No scans yet. Run your first scan to generate reports.</div></div>';return;}el.innerHTML=scans.map(s=>`<div class="scan-item"><div class="scan-icon">${s.rogue_count>0?'🚨':s.susp_count>0?'⚠️':'✅'}</div><div class="scan-info"><div class="scan-time">${new Date(s.timestamp).toLocaleString()}</div><div class="scan-files">${s.source_files}</div><div class="scan-badges">${s.rogue_count>0?`<span class="scan-badge badge-r">${s.rogue_count} Rogue</span>`:''}${s.susp_count>0?`<span class="scan-badge badge-s">${s.susp_count} Susp</span>`:''}<span class="scan-badge badge-f">${s.total_frames} Frames</span></div></div><div class="scan-actions"><button class="dl-btn" onclick="dlPDF('${s.scan_id}')">📄 PDF</button><button class="dl-btn" onclick="dlCSV('${s.scan_id}')">📊 CSV</button></div></div>`).join('');}catch(e){showToast('Failed to load history','error');}}
+async function dlPDF(id){showToast('Generating PDF...');window.location.href=`/api/report/${id}`;}
+async function dlCSV(id){showToast('Preparing CSV...');window.location.href=`/api/export/${id}/csv`;}
+function showLoading(show,msg='Processing...'){document.getElementById('loading').classList.toggle('hidden',!show);document.getElementById('loadingText').textContent=msg;}
+function showToast(msg,type='success'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:24px;right:24px;padding:14px 20px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);font-size:14px;z-index:1001';if(type==='error')t.style.borderColor='var(--rogue)',t.style.color='var(--rogue)';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
+</script>
+</body>
+</html>

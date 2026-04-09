@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RogueShield — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--blue-50:#eff6ff;--blue-100:#dbeafe;--blue-200:#bfdbfe;--blue-500:#3b82f6;--blue-600:#2563eb;--blue-700:#1d4ed8;--slate-50:#f8fafc;--slate-100:#f1f5f9;--slate-200:#e2e8f0;--slate-300:#cbd5e1;--slate-400:#94a3b8;--slate-500:#64748b;--slate-600:#475569;--slate-700:#334155;--slate-800:#1e293b;--slate-900:#0f172a;--red-50:#fef2f2;--red-100:#fee2e2;--red-400:#f87171;--red-500:#ef4444;--red-600:#dc2626;--green-50:#f0fdf4;--green-500:#22c55e;--border:#e2e8f0;--shadow-xl:0 20px 25px rgba(0,0,0,.10),0 10px 10px rgba(0,0,0,.04);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{background:var(--slate-100);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(var(--slate-200) 1px,transparent 1px);background-size:28px 28px;opacity:.6;pointer-events:none}
+.auth-wrap{position:relative;z-index:1;width:100%;max-width:420px}
+.auth-brand{text-align:center;margin-bottom:28px}
+.brand-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:10px}
+.brand-icon{width:44px;height:44px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(37,99,235,.35)}
+.brand-name{font-size:22px;font-weight:700;color:var(--slate-900);letter-spacing:-.4px}
+.brand-tagline{font-size:13px;color:var(--slate-500)}
+.auth-card{background:white;border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:var(--shadow-xl)}
+.auth-heading{font-size:20px;font-weight:700;color:var(--slate-900);margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--slate-500);margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--slate-700);margin-bottom:6px}
+.input-wrap{position:relative}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--slate-800);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;background:white}
+.form-input:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.form-input.has-icon{padding-left:38px}
+.input-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--slate-400);pointer-events:none}
+.toggle-pw{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--slate-400);font-size:13px;padding:2px 4px;transition:color .15s}
+.toggle-pw:hover{color:var(--slate-600)}
+.error-box{display:none;align-items:center;gap:8px;padding:10px 12px;background:var(--red-50);border:1px solid var(--red-100);border-radius:8px;font-size:12.5px;color:var(--red-700);margin-bottom:14px}
+.error-box.show{display:flex}
+.btn-submit{width:100%;padding:11px;background:linear-gradient(135deg,var(--blue-600),var(--blue-700));color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;margin-top:4px;box-shadow:0 1px 3px rgba(37,99,235,.3)}
+.btn-submit:hover{box-shadow:0 4px 12px rgba(37,99,235,.4);transform:translateY(-1px)}
+.btn-submit:active{transform:translateY(0)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.auth-footer{text-align:center;margin-top:20px;font-size:12.5px;color:var(--slate-500)}
+.auth-footer a{color:var(--blue-600);font-weight:500;text-decoration:none}
+.auth-footer a:hover{text-decoration:underline}
+.demo-info{margin-top:20px;padding:12px 14px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:8px}
+.demo-info p{font-size:12px;color:var(--blue-700);line-height:1.5}
+.demo-info code{background:var(--blue-100);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:11px}
+.divider{display:flex;align-items:center;gap:10px;margin:18px 0;font-size:12px;color:var(--slate-400)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.page-footer{text-align:center;margin-top:20px;font-size:11px;color:var(--slate-400)}
+
+.hidden{display:none!important}
+
+#step2{text-align:center}
+.code-sent{background:var(--blue-50);border:1px solid var(--blue-100);border-radius:8px;padding:16px;margin-bottom:20px;text-align:center}
+.code-sent p{font-size:13px;color:var(--blue-700);line-height:1.5}
+.code-input{display:flex;gap:8px;justify-content:center;margin:20px 0}
+.code-digit{width:48px;height:56px;border:2px solid var(--border);border-radius:10px;font-size:24px;font-weight:700;text-align:center;transition:all .2s}
+.code-digit:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,130,246,.15);outline:none}
+.timer{font-size:13px;color:var(--slate-500);margin-bottom:16px}
+.timer strong{color:var(--blue-600)}
+.resend-btn{background:none;border:none;color:var(--blue-600);font-size:13px;cursor:pointer;font-weight:500;padding:4px 8px;border-radius:4px;transition:background .15s}
+.resend-btn:hover{background:var(--blue-50)}
+.resend-btn:disabled{color:var(--slate-400);cursor:not-allowed}
+.back-link{display:block;text-align:center;margin-top:16px;font-size:13px;color:var(--slate-500)}
+.back-link:hover{color:var(--blue-600)}
+.success-box{display:none;align-items:center;gap:8px;padding:12px 14px;background:var(--green-50);border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534;margin-bottom:14px;text-align:center;justify-content:center}
+.success-box.show{display:flex}
+</style>
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-brand">
+    <div class="brand-mark">
+      <div class="brand-icon">🛡</div>
+      <div class="brand-name">RogueShield</div>
+    </div>
+    <div class="brand-tagline">Rogue Access Point Detection System</div>
+  </div>
+
+  <!-- Step 1: Credentials -->
+  <div class="auth-card" id="step1">
+    <div class="auth-heading">Sign in to your account</div>
+    <div class="auth-sub">Enter your credentials to access the dashboard</div>
+
+    <div class="error-box" id="errorBox">
+      <span>⚠</span><span id="errorMsg"></span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <div class="input-wrap">
+        <span class="input-icon">👤</span>
+        <input class="form-input has-icon" id="username" type="text" placeholder="Enter your username" autocomplete="username"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input class="form-input has-icon" id="password" type="password" placeholder="Enter your password" autocomplete="current-password"/>
+        <button class="toggle-pw" type="button" onclick="togglePw()" id="toggleBtn">Show</button>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="loginBtn" onclick="doLogin()">Sign In</button>
+
+    <div class="divider">or</div>
+
+    <div class="demo-info">
+      <p><strong>Demo credentials:</strong><br>
+      Username: <code>admin</code> &nbsp; Password: <code>Admin@1234</code><br>
+      Email: <code>admin@gmail.com</code></p>
+    </div>
+  </div>
+
+  <!-- Step 2: 2FA Verification -->
+  <div class="auth-card hidden" id="step2">
+    <div class="auth-heading">Verify Your Identity</div>
+    <div class="auth-sub">Enter the 6-digit code sent to your email</div>
+
+    <div class="error-box" id="errorBox2">
+      <span>⚠</span><span id="errorMsg2"></span>
+    </div>
+    <div class="success-box" id="successBox">
+      <span>✓</span><span>Code verified! Redirecting...</span>
+    </div>
+
+    <div class="code-sent">
+      <p>A 6-digit verification code has been sent to:<br><strong id="userEmail"></strong></p>
+    </div>
+
+    <div class="code-input">
+      <input type="text" class="code-digit" id="code1" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="handleCodeInput(this, 1)" onkeydown="handleCodeKeydown(event, 1)"/>
+      <input type="text" class="code-digit" id="code2" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="handleCodeInput(this, 2)" onkeydown="handleCodeKeydown(event, 2)"/>
+      <input type="text" class="code-digit" id="code3" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="handleCodeInput(this, 3)" onkeydown="handleCodeKeydown(event, 3)"/>
+      <input type="text" class="code-digit" id="code4" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="handleCodeInput(this, 4)" onkeydown="handleCodeKeydown(event, 4)"/>
+      <input type="text" class="code-digit" id="code5" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="handleCodeInput(this, 5)" onkeydown="handleCodeKeydown(event, 5)"/>
+      <input type="text" class="code-digit" id="code6" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="handleCodeInput(this, 6)" onkeydown="handleCodeKeydown(event, 6)"/>
+    </div>
+
+    <div class="timer">Code expires in <strong id="countdown">10:00</strong></div>
+
+    <button class="btn-submit" id="verifyBtn" onclick="verifyCode()">Verify Code</button>
+
+    <button class="resend-btn" id="resendBtn" onclick="resendCode()" disabled>Resend Code</button>
+    <span id="resendTimer" style="font-size:12px;color:var(--slate-400);margin-left:4px"></span>
+
+    <a href="#" class="back-link" onclick="backToLogin()">← Back to login</a>
+  </div>
+
+  <div class="auth-footer">
+    <a href="forgot-password.html" style="margin-right:15px">Forgot password?</a>
+    Don't have an account? <a href="register.html">Create one →</a>
+  </div>
+
+  <div class="page-footer">
+    Meru University of Science and Technology &nbsp;·&nbsp; CT206/109336/22 &nbsp;·&nbsp; Dr. Dorothy Bundi
+  </div>
+</div>
+
+<script>
+let pwVisible = false;
+let tempToken = '';
+let countdownInterval = null;
+let resendTimeout = null;
+
+function togglePw() {
+  pwVisible = !pwVisible;
+  const pw = document.getElementById('password');
+  pw.type = pwVisible ? 'text' : 'password';
+  document.getElementById('toggleBtn').textContent = pwVisible ? 'Hide' : 'Show';
+}
+
+function showErr(msg, step = 1) {
+  if (step === 1) {
+    document.getElementById('errorMsg').textContent = msg;
+    document.getElementById('errorBox').classList.add('show');
+  } else {
+    document.getElementById('errorMsg2').textContent = msg;
+    document.getElementById('errorBox2').classList.add('show');
+  }
+}
+
+function hideErr(step = 1) {
+  if (step === 1) {
+    document.getElementById('errorBox').classList.remove('show');
+  } else {
+    document.getElementById('errorBox2').classList.remove('show');
+  }
+}
+
+async function doLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('loginBtn');
+
+  hideErr(1);
+  if (!username || !password) { showErr('Please enter your username and password.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+
+    if (data.requires_2fa) {
+      tempToken = data.temp_token;
+      document.getElementById('userEmail').textContent = data.email;
+      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('step2').classList.remove('hidden');
+      startCountdown();
+      startResendTimer();
+      document.getElementById('code1').focus();
+    } else if (res.ok) {
+      window.location.href = '/index.html';
+    } else {
+      showErr(data.error || 'Login failed. Please try again.');
+    }
+  } catch {
+    showErr('Connection error. Is the server running?');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+function handleCodeInput(el, num) {
+  el.value = el.value.replace(/[^0-9]/g, '');
+  if (el.value && num < 6) {
+    document.getElementById('code' + (num + 1)).focus();
+  }
+  hideErr(2);
+}
+
+function handleCodeKeydown(e, num) {
+  if (e.key === 'Backspace' && !e.target.value && num > 1) {
+    document.getElementById('code' + (num - 1)).focus();
+  }
+  if (e.key === 'Enter') {
+    verifyCode();
+  }
+}
+
+function getCode() {
+  let code = '';
+  for (let i = 1; i <= 6; i++) {
+    code += document.getElementById('code' + i).value;
+  }
+  return code;
+}
+
+async function verifyCode() {
+  const code = getCode();
+  const btn = document.getElementById('verifyBtn');
+
+  hideErr(2);
+  if (code.length !== 6) {
+    showErr('Please enter the complete 6-digit code.', 2);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+  try {
+    const res = await fetch('/api/verify-2fa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ temp_token: tempToken, code })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      document.getElementById('successBox').classList.add('show');
+      document.getElementById('errorBox2').classList.remove('show');
+      clearInterval(countdownInterval);
+      clearTimeout(resendTimeout);
+      setTimeout(() => { window.location.href = '/index.html'; }, 1000);
+    } else {
+      showErr(data.error || 'Verification failed. Please try again.', 2);
+      btn.disabled = false;
+      btn.textContent = 'Verify Code';
+    }
+  } catch {
+    showErr('Connection error. Please try again.', 2);
+    btn.disabled = false;
+    btn.textContent = 'Verify Code';
+  }
+}
+
+async function resendCode() {
+  const btn = document.getElementById('resendBtn');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/resend-2fa', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+
+    if (res.ok) {
+      startResendTimer();
+      for (let i = 1; i <= 6; i++) document.getElementById('code' + i).value = '';
+      document.getElementById('code1').focus();
+      showErr('New code sent!', 2);
+    } else {
+      showErr(data.error || 'Failed to resend code.', 2);
+      btn.disabled = false;
+    }
+  } catch {
+    showErr('Connection error. Please try again.', 2);
+    btn.disabled = false;
+  }
+}
+
+function startCountdown() {
+  let seconds = 600;
+  clearInterval(countdownInterval);
+
+  function update() {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    document.getElementById('countdown').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+    if (seconds <= 0) {
+      clearInterval(countdownInterval);
+      document.getElementById('countdown').textContent = 'Expired';
+      document.getElementById('countdown').style.color = 'var(--red-500)';
+      showErr('Code expired. Click "Resend Code" to get a new one.', 2);
+    }
+    seconds--;
+  }
+
+  update();
+  countdownInterval = setInterval(update, 1000);
+}
+
+function startResendTimer() {
+  let seconds = 60;
+  const btn = document.getElementById('resendBtn');
+  const timer = document.getElementById('resendTimer');
+  btn.disabled = true;
+
+  clearTimeout(resendTimeout);
+
+  function update() {
+    timer.textContent = seconds > 0 ? `in ${seconds}s` : '';
+    if (seconds <= 0) {
+      btn.disabled = false;
+      timer.textContent = '';
+    }
+    seconds--;
+  }
+
+  update();
+  resendTimeout = setInterval(() => {
+    update();
+    if (seconds < 0) clearInterval(resendTimeout);
+  }, 1000);
+}
+
+function backToLogin() {
+  event.preventDefault();
+  clearInterval(countdownInterval);
+  clearTimeout(resendTimeout);
+  sessionStorage.clear();
+
+  for (let i = 1; i <= 6; i++) document.getElementById('code' + i).value = '';
+  document.getElementById('password').value = '';
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+  hideErr(2);
+  document.getElementById('countdown').style.color = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('step2').classList.contains('hidden')) {
+    if (e.key === 'Enter' && document.activeElement.classList.contains('code-digit')) {
+      verifyCode();
+    }
+  } else {
+    if (e.key === 'Enter') doLogin();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RogueShield — My Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+.profile-header{display:flex;align-items:center;gap:20px;padding:24px;background:linear-gradient(135deg,var(--blue-600),var(--blue-800));border-radius:var(--radius-xl);margin-bottom:20px;color:white;box-shadow:0 4px 14px rgba(37,99,235,.35)}
+.profile-avatar{width:64px;height:64px;border-radius:var(--radius-lg);background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:white;flex-shrink:0;border:2px solid rgba(255,255,255,.3)}
+.profile-name{font-size:22px;font-weight:700;margin-bottom:4px}
+.profile-meta{font-size:13px;opacity:.8}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:12.5px;color:var(--slate-500);font-weight:500}
+.info-value{font-size:13px;color:var(--slate-800);font-weight:500}
+.pw-strength{margin-top:6px}
+.pw-bars{display:flex;gap:3px;height:3px;margin-bottom:3px}
+.pw-bar{flex:1;border-radius:2px;background:var(--slate-200);transition:background .25s}
+.pw-bar.weak{background:#f87171}.pw-bar.fair{background:#fb923c}.pw-bar.good{background:#facc15}.pw-bar.strong{background:#22c55e}
+.pw-label{font-size:11px;color:var(--slate-400)}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title-wrap"><div class="page-eyebrow">Account</div><div class="page-title">My Profile</div></div>
+      <div class="page-actions"><a class="btn btn-secondary btn-sm" href="dashboard.html">← Dashboard</a></div>
+    </div>
+    <div class="page-body">
+
+      <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatar">A</div>
+        <div>
+          <div class="profile-name" id="profileName">Loading…</div>
+          <div class="profile-meta" id="profileMeta">—</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Account Information</div></div>
+          <div id="infoRows"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Change Password</div><div class="card-subtitle">Must be at least 8 characters</div></div></div>
+
+          <div id="pwSuccess" class="alert success" style="display:none"><span>✓</span><span>Password updated successfully!</span></div>
+          <div id="pwError" class="alert danger" style="display:none"><span>⚠</span><span id="pwErrMsg"></span></div>
+
+          <div class="form-group">
+            <label class="form-label">Current Password</label>
+            <input class="form-input" id="curPw" type="password" placeholder="Enter current password"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input class="form-input" id="newPw" type="password" placeholder="Enter new password" oninput="checkPwStrength()"/>
+            <div class="pw-strength">
+              <div class="pw-bars"><div class="pw-bar" id="b1"></div><div class="pw-bar" id="b2"></div><div class="pw-bar" id="b3"></div><div class="pw-bar" id="b4"></div></div>
+              <div class="pw-label" id="pwLbl">Enter a new password</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm New Password</label>
+            <input class="form-input" id="conPw" type="password" placeholder="Repeat new password"/>
+          </div>
+          <button class="btn btn-primary btn-full" id="pwBtn" onclick="changePw()">Update Password</button>
+        </div>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--red-300)">
+        <div class="card-header"><div><div class="card-title" style="color:var(--red-700)">Sign Out</div><div class="card-subtitle">End your current session</div></div></div>
+        <p style="font-size:13px;color:var(--slate-500);margin-bottom:14px">You will be redirected to the login page. Any unsaved work will remain in the database.</p>
+        <button class="btn btn-danger btn-sm" onclick="logout()">Sign Out</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="js/common.js"></script>
+<script>
+(async()=>{
+  const user=await initPage(null);if(!user)return;
+  document.getElementById('profileAvatar').textContent=user.username[0].toUpperCase();
+  document.getElementById('profileName').textContent=user.username;
+  document.getElementById('profileMeta').textContent=`${user.role} · Last login: ${user.last_login?new Date(user.last_login).toLocaleString():'—'}`;
+  document.getElementById('infoRows').innerHTML=`
+    <div class="info-row"><span class="info-label">Username</span><span class="info-value">${user.username}</span></div>
+    <div class="info-row"><span class="info-label">Email</span><span class="info-value">${user.email||'—'}</span></div>
+    <div class="info-row"><span class="info-label">Role</span><span class="info-value">${user.role}</span></div>
+    <div class="info-row"><span class="info-label">Account Created</span><span class="info-value">${user.created_at?new Date(user.created_at).toLocaleDateString():'—'}</span></div>
+    <div class="info-row"><span class="info-label">Last Login</span><span class="info-value">${user.last_login?new Date(user.last_login).toLocaleString():'—'}</span></div>`;
+})();
+function checkPwStrength(){
+  const pw=document.getElementById('newPw').value;
+  const len=pw.length>=8,up=/[A-Z]/.test(pw),num=/[0-9]/.test(pw),long=pw.length>=12;
+  const score=[len,up,num,long].filter(Boolean).length;
+  const cls=['','weak','fair','good','strong'][score];
+  const labels=['Enter a new password','Weak','Fair','Good','Strong'];
+  const colors={weak:'#f87171',fair:'#fb923c',good:'#facc15',strong:'#22c55e'};
+  ['b1','b2','b3','b4'].forEach((id,i)=>{const b=document.getElementById(id);b.className='pw-bar';if(i<score)b.classList.add(cls);});
+  const lbl=document.getElementById('pwLbl');lbl.textContent=labels[score];lbl.style.color=colors[cls]||'#94a3b8';
+}
+async function changePw(){
+  const cur=document.getElementById('curPw').value;
+  const nw=document.getElementById('newPw').value;
+  const con=document.getElementById('conPw').value;
+  const btn=document.getElementById('pwBtn');
+  document.getElementById('pwSuccess').style.display='none';
+  document.getElementById('pwError').style.display='none';
+  if(!cur||!nw||!con){showPwErr('Please fill in all fields.');return;}
+  btn.disabled=true;btn.textContent='Updating…';
+  try{const res=await apiFetch('/api/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current:cur,new:nw,confirm:con})});
+    if(!res)return;const d=await res.json();
+    if(res.ok){document.getElementById('pwSuccess').style.display='flex';document.getElementById('curPw').value='';document.getElementById('newPw').value='';document.getElementById('conPw').value='';checkPwStrength();}
+    else showPwErr(d.error||'Update failed.');
+  }finally{btn.disabled=false;btn.textContent='Update Password';}
+}
+function showPwErr(msg){document.getElementById('pwErrMsg').textContent=msg;document.getElementById('pwError').style.display='flex';}
+</script>
+</body></html>

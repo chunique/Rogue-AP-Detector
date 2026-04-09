@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RogueShield — Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--blue-50:#eff6ff;--blue-100:#dbeafe;--blue-500:#3b82f6;--blue-600:#2563eb;--blue-700:#1d4ed8;--slate-50:#f8fafc;--slate-100:#f1f5f9;--slate-200:#e2e8f0;--slate-300:#cbd5e1;--slate-400:#94a3b8;--slate-500:#64748b;--slate-600:#475569;--slate-700:#334155;--slate-800:#1e293b;--slate-900:#0f172a;--red-50:#fef2f2;--red-100:#fee2e2;--red-400:#f87171;--red-500:#ef4444;--red-600:#dc2626;--red-700:#b91c1c;--orange-400:#fb923c;--yellow-400:#facc15;--green-50:#f0fdf4;--green-100:#dcfce7;--green-500:#22c55e;--green-600:#16a34a;--green-700:#15803d;--border:#e2e8f0;--shadow-xl:0 20px 25px rgba(0,0,0,.10),0 10px 10px rgba(0,0,0,.04);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{background:var(--slate-100);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(var(--slate-200)1px,transparent 1px);background-size:28px 28px;opacity:.6;pointer-events:none}
+.auth-wrap{position:relative;z-index:1;width:100%;max-width:440px}
+.auth-brand{text-align:center;margin-bottom:24px}
+.brand-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:8px}
+.brand-icon{width:42px;height:42px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+.brand-name{font-size:21px;font-weight:700;color:var(--slate-900);letter-spacing:-.3px}
+.brand-tagline{font-size:13px;color:var(--slate-500)}
+.auth-card{background:white;border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:var(--shadow-xl)}
+.auth-heading{font-size:20px;font-weight:700;color:var(--slate-900);margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--slate-500);margin-bottom:24px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--slate-700);margin-bottom:5px}
+.input-wrap{position:relative}
+.form-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--slate-800);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit}
+.form-input:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.form-input.has-icon{padding-left:36px}
+.form-input.error{border-color:var(--red-400)}
+.input-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--slate-400);pointer-events:none}
+.toggle-pw{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--slate-400);font-size:12px;padding:2px 4px}
+.toggle-pw:hover{color:var(--slate-600)}
+.field-error{font-size:11.5px;color:var(--red-600);margin-top:3px;display:none}
+.field-error.show{display:block}
+
+/* Password strength */
+.pw-strength{margin-top:6px}
+.pw-bars{display:flex;gap:3px;height:3px;margin-bottom:3px}
+.pw-bar{flex:1;border-radius:2px;background:var(--slate-200);transition:background .25s}
+.pw-bar.weak{background:var(--red-400)}.pw-bar.fair{background:var(--orange-400)}.pw-bar.good{background:var(--yellow-400)}.pw-bar.strong{background:var(--green-500)}
+.pw-label{font-size:11px;color:var(--slate-400)}
+
+/* Requirements checklist */
+.req-list{margin-top:6px;display:flex;flex-direction:column;gap:3px}
+.req-item{font-size:11.5px;color:var(--slate-400);display:flex;align-items:center;gap:5px;transition:color .2s}
+.req-item.met{color:var(--green-600)}
+.req-item .req-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--slate-300);display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .2s;flex-shrink:0}
+.req-item.met .req-dot{background:var(--green-500);border-color:var(--green-500);color:white}
+
+.error-box{display:none;align-items:center;gap:8px;padding:10px 12px;background:var(--red-50);border:1px solid var(--red-100);border-radius:8px;font-size:12.5px;color:var(--red-700);margin-bottom:14px}
+.error-box.show{display:flex}
+.success-box{display:none;align-items:center;gap:8px;padding:12px 14px;background:var(--green-50);border:1px solid var(--green-100);border-radius:8px;font-size:13px;color:var(--green-700);margin-bottom:14px}
+.success-box.show{display:flex}
+
+.btn-submit{width:100%;padding:11px;background:linear-gradient(135deg,var(--blue-600),var(--blue-700));color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;box-shadow:0 1px 3px rgba(37,99,235,.3)}
+.btn-submit:hover{box-shadow:0 4px 12px rgba(37,99,235,.4);transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.auth-footer{text-align:center;margin-top:18px;font-size:12.5px;color:var(--slate-500)}
+.auth-footer a{color:var(--blue-600);font-weight:500;text-decoration:none}
+.auth-footer a:hover{text-decoration:underline}
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0;font-size:12px;color:var(--slate-400)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.page-footer{text-align:center;margin-top:18px;font-size:11px;color:var(--slate-400)}
+</style>
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-brand">
+    <div class="brand-mark">
+      <div class="brand-icon">🛡</div>
+      <div class="brand-name">RogueShield</div>
+    </div>
+    <div class="brand-tagline">Create your administrator account</div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-heading">Create account</div>
+    <div class="auth-sub">Set up your RogueShield administrator profile</div>
+
+    <div class="error-box"   id="errorBox"><span>⚠</span><span id="errorMsg"></span></div>
+    <div class="success-box" id="successBox"><span>✓</span><span>Account created! Redirecting to login…</span></div>
+
+    <div class="form-group">
+      <label class="form-label">Username <span style="color:#ef4444">*</span></label>
+      <div class="input-wrap">
+        <span class="input-icon">👤</span>
+        <input class="form-input has-icon" id="username" type="text" placeholder="e.g. john_doe" autocomplete="username" oninput="validateUsername()"/>
+      </div>
+      <div class="field-error" id="usernameErr"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email address <span style="color:#ef4444">*</span></label>
+      <div class="input-wrap">
+        <span class="input-icon">✉</span>
+        <input class="form-input has-icon" id="email" type="email" placeholder="you@gmail.com" autocomplete="email" oninput="validateEmail()"/>
+      </div>
+      <div class="field-error" id="emailErr"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password <span style="color:#ef4444">*</span></label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input class="form-input has-icon" id="password" type="password" placeholder="Create a strong password" autocomplete="new-password" oninput="checkStrength()"/>
+        <button class="toggle-pw" type="button" onclick="togglePw('password','t1')" id="t1">Show</button>
+      </div>
+      <div class="pw-strength">
+        <div class="pw-bars">
+          <div class="pw-bar" id="b1"></div><div class="pw-bar" id="b2"></div>
+          <div class="pw-bar" id="b3"></div><div class="pw-bar" id="b4"></div>
+        </div>
+        <div class="pw-label" id="pwLabel">Enter a password</div>
+      </div>
+      <div class="req-list">
+        <div class="req-item" id="r1"><span class="req-dot"></span>At least 8 characters</div>
+        <div class="req-item" id="r2"><span class="req-dot"></span>One uppercase letter</div>
+        <div class="req-item" id="r3"><span class="req-dot"></span>One number</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Confirm password <span style="color:#ef4444">*</span></label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input class="form-input has-icon" id="confirm" type="password" placeholder="Repeat your password" autocomplete="new-password" oninput="validateConfirm()"/>
+        <button class="toggle-pw" type="button" onclick="togglePw('confirm','t2')" id="t2">Show</button>
+      </div>
+      <div class="field-error" id="confirmErr"></div>
+    </div>
+
+    <button class="btn-submit" id="regBtn" onclick="doRegister()">Create Account</button>
+
+    <div class="divider">already have an account</div>
+  </div>
+
+  <div class="auth-footer">
+    Already have an account? <a href="/">Sign in →</a>
+  </div>
+  <div class="page-footer">Meru University of Science and Technology · CT206/109336/22</div>
+</div>
+
+<script>
+let visible1=false, visible2=false;
+function togglePw(id, btnId) {
+  if(id==='password'){visible1=!visible1;document.getElementById(id).type=visible1?'text':'password';document.getElementById(btnId).textContent=visible1?'Hide':'Show';}
+  else{visible2=!visible2;document.getElementById(id).type=visible2?'text':'password';document.getElementById(btnId).textContent=visible2?'Hide':'Show';}
+}
+
+function setReq(id, met) {
+  const el = document.getElementById(id);
+  el.classList.toggle('met', met);
+  el.querySelector('.req-dot').textContent = met ? '✓' : '';
+}
+
+function checkStrength() {
+  const pw = document.getElementById('password').value;
+  const len = pw.length >= 8;
+  const up  = /[A-Z]/.test(pw);
+  const num = /[0-9]/.test(pw);
+  setReq('r1',len); setReq('r2',up); setReq('r3',num);
+  const score = [len,up,num,pw.length>=12].filter(Boolean).length;
+  const cls   = ['','weak','fair','good','strong'][score];
+  const label = ['Enter a password','Weak','Fair','Good','Strong'][score];
+  const colors = {weak:'#f87171',fair:'#fb923c',good:'#facc15',strong:'#22c55e'};
+  ['b1','b2','b3','b4'].forEach((id,i) => {
+    const b = document.getElementById(id);
+    b.className = 'pw-bar';
+    if(i < score) b.classList.add(cls);
+  });
+  document.getElementById('pwLabel').textContent = label;
+  document.getElementById('pwLabel').style.color = colors[cls]||'#94a3b8';
+  validateConfirm();
+}
+
+function validateUsername() {
+  const v = document.getElementById('username').value;
+  const e = document.getElementById('usernameErr');
+  if(v && v.length < 3){showFieldErr('usernameErr','Username must be at least 3 characters');}
+  else if(v && !/^[a-zA-Z0-9_]+$/.test(v)){showFieldErr('usernameErr','Only letters, numbers, and underscores allowed');}
+  else{e.classList.remove('show');}
+}
+function validateEmail() {
+  const v = document.getElementById('email').value;
+  const e = document.getElementById('emailErr');
+  if(v && !/^[^@]+@gmail\.com$/.test(v)){showFieldErr('emailErr','Only Gmail addresses (@gmail.com) are allowed');}
+  else{e.classList.remove('show');}
+}
+function validateConfirm() {
+  const p = document.getElementById('password').value;
+  const c = document.getElementById('confirm').value;
+  if(c && p !== c){showFieldErr('confirmErr','Passwords do not match');}
+  else{document.getElementById('confirmErr').classList.remove('show');}
+}
+function showFieldErr(id, msg) {
+  const e = document.getElementById(id);
+  e.textContent = msg; e.classList.add('show');
+}
+
+async function doRegister() {
+  const username = document.getElementById('username').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const confirm  = document.getElementById('confirm').value;
+  const btn = document.getElementById('regBtn');
+  document.getElementById('errorBox').classList.remove('show');
+
+  if (!username||!email||!password||!confirm){showErr('Please fill in all fields.');return;}
+
+  btn.disabled=true; btn.textContent='Creating account…';
+  try {
+    const res = await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username,email,password,confirm})});
+    const data = await res.json();
+    if(res.ok){
+      document.getElementById('successBox').classList.add('show');
+      setTimeout(()=>window.location.href='/',2000);
+    } else { showErr(data.error||'Registration failed.'); }
+  } catch { showErr('Connection error.'); }
+  finally { btn.disabled=false; btn.textContent='Create Account'; }
+}
+
+function showErr(msg){
+  document.getElementById('errorMsg').textContent=msg;
+  document.getElementById('errorBox').classList.add('show');
+}
+</script>
+</body>
+</html>

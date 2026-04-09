@@ -1,0 +1,7 @@
+Timestamp,type,MAC_timestamp,rssi,addr1,addr2,addr3,SSID
+1682625745.192307,Dot11Beacon,2224644021,-55,ff:ff:ff:ff:ff:ff,00:00:00:00:00:02,00:00:00:00:00:02,b'MUST_WiFi'
+1682625745.211763,Dot11Beacon,2224663539,-71,ff:ff:ff:ff:ff:ff,00:00:00:00:00:04,00:00:00:00:00:04,b'MUST_WiFi'
+1682625745.212303,Dot11Beacon,2224664076,-71,ff:ff:ff:ff:ff:ff,00:00:00:00:00:06,00:00:00:00:00:06,b'MUST_WiFi'
+1682625745.225779,Dot11Beacon,2224677565,-56,ff:ff:ff:ff:ff:ff,de:ad:be:ef:ca:fe,de:ad:be:ef:ca:fe,b'MUST_WiFi'
+1682625745.257874,Dot11ProbeResp,2224709672,-56,00:00:00:00:00:09,de:ad:be:ef:ca:fe,de:ad:be:ef:ca:fe,b'MUST_WiFi'
+1682625745.258248,Dot11ProbeResp,2224710048,-56,00:00:00:00:00:09,de:ad:be:ef:ca:fe,de:ad:be:ef:ca:fe,b'MUST_WiFi'

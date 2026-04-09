@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RogueShield — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1E1E1E;--surface:#2D2D2D;--surface2:#3D3D3D;--surface3:#4A4A4A;
+  --border:#404040;--accent:#4EC9B0;--accent-light:#6EE7D0;
+  --safe:#4EC9B0;--suspicious:#CE9178;--rogue:#F44747;
+  --text:#E0E0E0;--text2:#A0A0A0;--muted:#6B6B6B;
+  --radius:10px;--shadow:0 2px 8px rgba(0,0,0,0.3);
+  --sidebar-w:240px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-brand{padding:20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#4EC9B0,#2E8B7A);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{font-weight:700;font-size:18px}
+.logo-text span{color:var(--accent)}
+.sidebar-nav{flex:1;padding:16px 12px}
+.nav-section{margin-bottom:20px}
+.nav-section-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;padding:0 12px;margin-bottom:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text2);font-size:13.5px;font-weight:500;transition:all .15s;text-decoration:none;margin-bottom:2px}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(78,201,176,0.1);color:var(--accent);border:1px solid rgba(78,201,176,0.2)}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.user-avatar{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:600;font-size:13px;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:11px;color:var(--muted)}
+.logout-btn{width:28px;height:28px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s}
+.logout-btn:hover{background:rgba(244,71,71,0.2);border-color:var(--rogue);color:var(--rogue)}
+
+.main{margin-left:var(--sidebar-w);flex:1;padding:32px;max-width:1400px}
+.page-header{margin-bottom:28px}
+.page-title{font-size:28px;font-weight:700}
+.page-subtitle{font-size:14px;color:var(--muted);margin-top:4px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:28px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:24px;border:1px solid var(--border)}
+.stat-icon{font-size:28px;margin-bottom:12px}
+.stat-value{font-size:36px;font-weight:700;line-height:1}
+.stat-label{font-size:13px;color:var(--text2);margin-top:6px}
+.stat-card.rogue{border-color:rgba(244,71,71,0.3)}
+.stat-card.rogue .stat-value{color:var(--rogue)}
+.stat-card.suspicious{border-color:rgba(206,145,120,0.3)}
+.stat-card.suspicious .stat-value{color:var(--suspicious)}
+.stat-card.safe{border-color:rgba(78,201,176,0.3)}
+.stat-card.safe .stat-value{color:var(--safe)}
+
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:24px}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:600}
+.card-body{padding:24px}
+
+.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.quick-btn{display:flex;align-items:center;gap:12px;padding:16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text)}
+.quick-btn:hover{border-color:var(--accent)}
+.quick-icon{font-size:24px}
+.quick-text{font-weight:500;font-size:14px}
+.quick-desc{font-size:12px;color:var(--muted);margin-top:2px}
+
+.rule-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.rule-item:last-child{border-bottom:none}
+.rule-name{font-size:14px}
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-rogue{background:rgba(244,71,71,0.15);color:var(--rogue)}
+.badge-suspicious{background:rgba(206,145,120,0.15);color:var(--suspicious)}
+.badge-safe{background:rgba(78,201,176,0.15);color:var(--safe)}
+.badge-neutral{background:var(--surface2);color:var(--text2)}
+
+.history-list{display:flex;flex-direction:column;gap:10px}
+.history-item{display:flex;align-items:center;gap:16px;padding:16px 20px;background:var(--surface2);border-radius:var(--radius);cursor:pointer;transition:all .2s}
+.history-item:hover{background:var(--surface3);transform:translateX(4px)}
+.history-icon{font-size:24px}
+.history-info{flex:1}
+.history-time{font-size:12px;color:var(--muted);margin-bottom:2px}
+.history-files{font-size:14px;font-weight:500}
+.history-badges{display:flex;gap:6px;margin-top:6px}
+.history-actions{display:flex;gap:8px}
+
+.loading{position:fixed;inset:0;background:rgba(30,30,30,0.95);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px}
+.loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--text2)}
+.hidden{display:none!important}
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);font-size:14px;box-shadow:var(--shadow);transform:translateY(100px);opacity:0;transition:all .3s;z-index:1001}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--rogue);color:var(--rogue)}
+.toast.success{border-color:var(--safe);color:var(--safe)}
+.empty{text-align:center;padding:48px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-weight:500;font-size:13px;cursor:pointer;border:none;transition:all .2s;text-decoration:none}
+.btn-primary{background:var(--accent);color:var(--bg)}
+.btn-primary:hover{background:var(--accent-light)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--surface3)}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+@media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr}.main{padding:16px}.sidebar{transform:translateX(-100%);transition:transform .25s}.sidebar.open{transform:translateX(0)}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-icon">🛡</div>
+      <div class="logo-text">Rogue<span>Shield</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="index.html" class="nav-item active">Dashboard</a>
+        <a href="demo.html" class="nav-item">Demo</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Analysis</div>
+        <a href="scan.html" class="nav-item">Scan</a>
+        <a href="history.html" class="nav-item">History</a>
+        <a href="results.html" class="nav-item">Results</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="whitelist.html" class="nav-item">Access Points</a>
+        <a href="reports.html" class="nav-item">Reports</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+        <button class="logout-btn" onclick="logout()">↩</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="page-title">Dashboard</div>
+      <div class="page-subtitle">Rogue AP Detection System Overview</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📡</div>
+        <div class="stat-value" id="statScans">0</div>
+        <div class="stat-label">Total Scans</div>
+      </div>
+      <div class="stat-card rogue">
+        <div class="stat-icon">🚨</div>
+        <div class="stat-value" id="statRogues">0</div>
+        <div class="stat-label">Rogue APs Detected</div>
+      </div>
+      <div class="stat-card suspicious">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-value" id="statSusp">0</div>
+        <div class="stat-label">Suspicious APs</div>
+      </div>
+      <div class="stat-card safe">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="statWl">0</div>
+        <div class="stat-label">Registered APs</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Quick Actions</div>
+        </div>
+        <div class="card-body">
+          <div class="quick-actions">
+            <a href="scan.html" class="quick-btn">
+              <span class="quick-icon">🔍</span>
+              <div><div class="quick-text">New Scan</div><div class="quick-desc">Analyze capture files</div></div>
+            </a>
+            <a href="demo.html" class="quick-btn" onclick="runDemo(event)">
+              <span class="quick-icon">📊</span>
+              <div><div class="quick-text">Run Demo</div><div class="quick-desc">Test with sample data</div></div>
+            </a>
+            <a href="whitelist.html" class="quick-btn">
+              <span class="quick-icon">🛡</span>
+              <div><div class="quick-text">Access Points</div><div class="quick-desc">Manage registered APs</div></div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Detection Rules</div>
+        </div>
+        <div class="card-body">
+          <div class="rule-item"><span class="rule-name">SSID Spoofing</span><span class="badge badge-rogue">HIGH RISK</span></div>
+          <div class="rule-item"><span class="rule-name">MAC Address Inconsistency</span><span class="badge badge-rogue">HIGH RISK</span></div>
+          <div class="rule-item"><span class="rule-name">Unknown BSSID</span><span class="badge badge-suspicious">MEDIUM RISK</span></div>
+          <div class="rule-item"><span class="rule-name">RSSI Anomaly (ML)</span><span class="badge badge-suspicious">MEDIUM RISK</span></div>
+          <div class="rule-item"><span class="rule-name">Probe Response Flood</span><span class="badge badge-safe">LOW RISK</span></div>
+          <div class="rule-item"><span class="rule-name">MAC Timestamp Drift</span><span class="badge badge-neutral">LOW RISK</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent Scans</div>
+        <a href="history.html" class="btn btn-secondary btn-sm">View All</a>
+      </div>
+      <div class="card-body">
+        <div class="history-list" id="recentScans">
+          <div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No scans yet. Run a scan to get started.</div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="loading hidden" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">Processing...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const api=(path,opts={})=>{
+  const method=opts.method||'GET';
+  const body=opts.body?JSON.stringify(opts.body):undefined;
+  return fetch(path,{method,headers:{'Content-Type':'application/json',...opts.headers},credentials:'include',body})
+    .then(async r=>{const t=await r.text();try{return JSON.parse(t)}catch{return{error:t}}});
+};
+
+async function init(){
+  const me=await api('/api/me');
+  if(me.error)return window.location.href='/login.html';
+  document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();
+  document.getElementById('userName').textContent=me.username;
+  loadSummary();
+}
+
+async function loadSummary(){
+  const d=await api('/api/summary');
+  document.getElementById('statScans').textContent=d.total_scans||0;
+  document.getElementById('statRogues').textContent=d.total_rogue||0;
+  document.getElementById('statSusp').textContent=d.total_susp||0;
+  document.getElementById('statWl').textContent=d.whitelist_size||0;
+  const el=document.getElementById('recentScans');
+  if(!d.recent_scans?.length)return;
+  el.innerHTML=d.recent_scans.map(s=>`
+    <div class="history-item" onclick="window.location.href='results.html?id=${s.scan_id}'">
+      <div class="history-icon">${s.rogue_count>0?'🚨':s.susp_count>0?'⚠️':'✅'}</div>
+      <div class="history-info">
+        <div class="history-time">${new Date(s.timestamp).toLocaleString()}</div>
+        <div class="history-files">${s.source_files}</div>
+        <div class="history-badges">
+          ${s.rogue_count>0?`<span class="badge badge-rogue">${s.rogue_count} Rogue</span>`:''}
+          ${s.susp_count>0?`<span class="badge badge-suspicious">${s.susp_count} Suspicious</span>`:''}
+          <span class="badge badge-neutral">${s.total_frames} frames</span>
+        </div>
+      </div>
+      <div class="history-actions">
+        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();downloadPDF('${s.scan_id}')">📄</button>
+      </div>
+    </div>`).join('');
+}
+
+function runDemo(e){e.preventDefault();showLoading(true,'Running demo...');api('/api/demo').then(d=>{if(d.error){toast(d.error,'error');showLoading(false);return;}sessionStorage.setItem('demoResults',JSON.stringify(d));window.location.href='results.html?demo=1';});}
+function downloadPDF(scanId){window.location.href=`/api/report/${scanId}`;}
+function logout(){api('/api/logout',{method:'POST'});window.location.href='/login.html';}
+function showLoading(show,msg='Processing...'){document.getElementById('loading').classList.toggle('hidden',!show);document.getElementById('loadingText').textContent=msg;}
+function toast(msg,type='success'){const t=document.getElementById('toast');t.textContent=(type==='error'?'✗ ':'✓ ')+msg;t.className=`toast show ${type}`;setTimeout(()=>t.classList.remove('show'),3500);}
+
+init();
+</script>
+</body>
+</html>
