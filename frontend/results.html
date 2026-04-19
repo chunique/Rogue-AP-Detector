@@ -65,6 +65,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .finding-rule{font-size:14px;font-weight:600;margin-bottom:4px}
 .finding-detail{font-size:13px;color:var(--text2);line-height:1.5}
 .finding-bssid{font-family:'Consolas',monospace;font-size:12px;color:var(--accent);margin-top:6px}
+.finding-issues{margin-top:10px;padding:10px;background:var(--surface3);border-radius:6px;font-size:12px}
+.finding-issue{margin-bottom:6px;padding-left:10px;border-left:2px solid var(--border)}
+.finding-issue:last-child{margin-bottom:0}
+.finding-issue-sev{font-weight:600;margin-bottom:2px}
+.finding-issue-det{color:var(--text2);font-size:11px}
 
 .rule-bars{display:flex;flex-direction:column;gap:12px;margin-top:8px}
 .rule-bar{background:var(--surface2);border-radius:6px;padding:12px;border:1px solid var(--border)}
@@ -110,7 +115,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Management</div>
-        <a href="whitelist.html" class="nav-item">Access Points</a>
+        <a href="users.html" class="nav-item" id="navUsers">Users</a>
+        <a href="whitelist.html" class="nav-item" id="navAccessPoints">Access Points</a>
         <a href="reports.html" class="nav-item">Reports</a>
       </div>
     </nav>
@@ -119,7 +125,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="user-avatar" id="userAvatar">A</div>
         <div class="user-info">
           <div class="user-name" id="userName">Admin</div>
-          <div class="user-role">Administrator</div>
+          <div class="user-role" id="userRole">Administrator</div>
         </div>
         <button class="logout-btn" onclick="logout()">↩</button>
       </div>
@@ -176,7 +182,7 @@ let sevChart=null,frameChart=null;
 const api=(path,opts={})=>{const method=opts.method||'GET';const body=opts.body?JSON.stringify(opts.body):undefined;return fetch(path,{method,headers:{'Content-Type':'application/json',...opts.headers},credentials:'include',body}).then(async r=>{const t=await r.text();try{return JSON.parse(t)}catch{return{error:t}}})};
 function getQueryParam(k){return new URLSearchParams(location.search).get(k);}
 
-(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;
+(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;document.getElementById('userRole').textContent=me.role==='admin'?'Administrator':'User';if(me.role!=='admin'){document.getElementById('navUsers').style.display='none';document.getElementById('navAccessPoints').style.display='none';}
 
   const demo=getQueryParam('demo');
   if(demo){const stored=sessionStorage.getItem('demoResults');if(stored){render(JSON.parse(stored));return;}}
@@ -187,8 +193,10 @@ function getQueryParam(k){return new URLSearchParams(location.search).get(k);}
 })();
 
 function render(data){
-  const{stats,findings,rule_counts,source_files,timestamp}=data;
-  document.getElementById('scanMeta').textContent=`${new Date(timestamp).toLocaleString()} · ${source_files.join(', ')}`;
+  const{stats,bssid_scores,rule_counts,source_files,timestamp,analysis_mode}=data;
+  const sf=Array.isArray(source_files)?source_files.join(', '):source_files;
+  const modeLabel=analysis_mode==='notebook'?'(Notebook Analysis)':'';
+  document.getElementById('scanMeta').textContent=`${new Date(timestamp).toLocaleString()} · ${sf} ${modeLabel}`;
   document.getElementById('sFrames').textContent=(stats.total_frames||0).toLocaleString();
   document.getElementById('sBSSIDs').textContent=stats.unique_bssids||0;
   document.getElementById('sSSIDs').textContent=`${stats.unique_ssids||0} SSIDs`;
@@ -196,7 +204,8 @@ function render(data){
   document.getElementById('sSusp').textContent=stats.suspicious_count||0;
 
   if(sevChart)sevChart.destroy();
-  sevChart=new Chart(document.getElementById('sevChart').getContext('2d'),{type:'doughnut',data:{labels:['HIGH','MEDIUM','LOW'],datasets:[{data:[stats.severity_counts?.HIGH||0,stats.severity_counts?.MEDIUM||0,stats.severity_counts?.LOW||0],backgroundColor:['#F44747','#CE9178','#4EC9B0'],borderColor:['#F44747','#CE9178','#4EC9B0'],borderWidth:2,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#A0A0A0',font:{size:11},boxWidth:10}}}}});
+  const sevData=stats.severity_counts||{HIGH:0,MEDIUM:0,LOW:0};
+  sevChart=new Chart(document.getElementById('sevChart').getContext('2d'),{type:'doughnut',data:{labels:['HIGH','MEDIUM','LOW'],datasets:[{data:[sevData.HIGH||0,sevData.MEDIUM||0,sevData.LOW||0],backgroundColor:['#F44747','#CE9178','#4EC9B0'],borderColor:['#F44747','#CE9178','#4EC9B0'],borderWidth:2,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#A0A0A0',font:{size:11},boxWidth:10}}}}});
 
   if(frameChart)frameChart.destroy();
   const frameCtx=document.getElementById('frameChart').getContext('2d');
@@ -206,10 +215,28 @@ function render(data){
   const mx=Math.max(...Object.values(rule_counts||{}),1);
   document.getElementById('ruleBars').innerHTML=Object.entries(rule_counts||{}).map(([r,c])=>`<div class="rule-bar"><div class="rule-bar-header"><span class="rule-bar-name">${r}</span><span class="rule-bar-count">${c}</span></div><div class="rule-bar-track"><div class="rule-bar-fill" style="width:${(c/mx)*100}%"></div></div></div>`).join('');
 
-  const seen=new Set();
-  const dedup=(findings||[]).filter(f=>{const k=f.rule+(f.affected_bssid||'')+(f.ssid||'');if(seen.has(k))return false;seen.add(k);return true;});
-  document.getElementById('findingCount').textContent=`${dedup.length} finding${dedup.length!==1?'s':''}`;
-  document.getElementById('findingsList').innerHTML=dedup.length?dedup.map(f=>`<div class="finding-item"><div class="finding-badge ${f.severity==='HIGH'?'rogue':f.severity==='MEDIUM'?'suspicious':'low'}">${f.severity}</div><div class="finding-body"><div class="finding-rule">${f.rule}</div><div class="finding-detail">${f.detail}</div>${f.affected_bssid?`<div class="finding-bssid">BSSID: ${f.affected_bssid}</div>`:''}</div></div>`).join(''):'<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No findings detected</div></div>';
+  const bssidList=Object.values(bssid_scores||{});
+  document.getElementById('findingCount').textContent=`${bssidList.length} access point${bssidList.length!==1?'s':''} with issues`;
+  
+  if(bssidList.length===0){
+    document.getElementById('findingsList').innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No threats detected - all access points are safe</div></div>';
+    return;
+  }
+  
+  document.getElementById('findingsList').innerHTML=bssidList.map(bssid=>{
+    const sevClass=bssid.verdict==='ROGUE'?'rogue':bssid.verdict==='SUSPICIOUS'?'suspicious':'low';
+    const issues=(bssid.findings||[]).map(f=>`<div class="finding-issue">
+      <div class="finding-issue-sev" style="color:${f.severity==='HIGH'?'#F44747':f.severity==='MEDIUM'?'#CE9178':'#4EC9B0'}">${f.rule} (${f.severity})</div>
+      <div class="finding-issue-det">${f.detail||f.description||''}</div>
+    </div>`).join('');
+    return`<div class="finding-item">
+      <div class="finding-badge ${sevClass}">${bssid.verdict}<br><span style="font-size:10px">Score: ${bssid.score}</span></div>
+      <div class="finding-body">
+        <div class="finding-bssid">BSSID: ${bssid.bssid} · SSIDs: ${(bssid.ssids||[]).join(', ') || 'N/A'}</div>
+        <div class="finding-issues">${issues}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function logout(){api('/api/logout',{method:'POST'});window.location.href='/login.html';}

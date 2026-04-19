@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RogueShield — Verify Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#1E1E1E;--surface:#2D2D2D;--surface2:#3D3D3D;--surface3:#4A4A4A;
+  --border:#404040;--accent:#4EC9B0;--accent-light:#6EE7D0;
+  --safe:#4EC9B0;--suspicious:#CE9178;--rogue:#F44747;
+  --text:#E0E0E0;--text2:#A0A0A0;--muted:#6B6B6B;
+  --radius:10px;--shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;color:var(--text)}
+.auth-wrap{position:relative;z-index:1;width:100%;max-width:440px}
+.auth-brand{text-align:center;margin-bottom:28px}
+.brand-mark{display:inline-flex;align-items:center;gap:12px;margin-bottom:8px}
+.brand-icon{width:48px;height:48px;background:linear-gradient(135deg,#4EC9B0,#2E8B7A);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(78,201,176,.3)}
+.brand-name{font-size:24px;font-weight:700;color:var(--text)}
+.brand-tagline{font-size:13px;color:var(--muted);margin-top:4px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:var(--shadow)}
+.auth-heading{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:5px}
+.input-wrap{position:relative}
+.form-input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-size:20px;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;text-align:center;letter-spacing:8px;background:var(--surface2)}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(78,201,176,.15)}
+.form-input::placeholder{color:var(--muted);letter-spacing:8px}
+.error-box{display:none;align-items:center;gap:10px;padding:12px 14px;background:rgba(244,71,71,.1);border:1px solid rgba(244,71,71,.3);border-radius:8px;font-size:13px;color:var(--rogue);margin-bottom:16px}
+.error-box.show{display:flex}
+.success-box{display:none;align-items:center;gap:8px;padding:14px 16px;background:rgba(78,201,176,.1);border:1px solid rgba(78,201,176,.3);border-radius:8px;font-size:13px;color:var(--accent);margin-bottom:16px}
+.success-box.show{display:flex}
+.btn-submit{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#2E8B7A);color:var(--bg);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;box-shadow:0 2px 8px rgba(78,201,176,.25)}
+.btn-submit:hover{box-shadow:0 4px 14px rgba(78,201,176,.35);transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-resend{background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;padding:8px}
+.btn-resend:hover{text-decoration:underline}
+.auth-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--muted)}
+.auth-footer a{color:var(--accent);font-weight:500;text-decoration:none}
+.auth-footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-brand">
+    <div class="brand-mark">
+      <div class="brand-icon">🛡</div>
+      <div class="brand-name">RogueShield</div>
+    </div>
+    <div class="brand-tagline">Verify your account</div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-heading">Email Verification</div>
+    <div class="auth-sub">Enter the 6-digit code sent to <span id="userEmail"></span></div>
+
+    <div class="error-box" id="errorBox"><span>⚠</span><span id="errorMsg"></span></div>
+    <div class="success-box" id="successBox"><span>✓</span><span>Account verified! Redirecting to dashboard…</span></div>
+
+    <div class="form-group">
+      <label class="form-label">Verification Code</label>
+      <div class="input-wrap">
+        <input class="form-input" id="code" type="text" maxlength="6" placeholder="000000" autocomplete="one-time-code"/>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="verifyBtn" onclick="doVerify()">Verify Account</button>
+
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn-resend" id="resendBtn" onclick="resendCode()">Resend Code</button>
+    </div>
+  </div>
+
+  <div class="auth-footer">
+    <a href="login.html">Back to Login</a>
+  </div>
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const tempToken = urlParams.get('token');
+
+if (!tempToken) {
+  document.getElementById('errorMsg').textContent = 'Invalid verification link. Please register again.';
+  document.getElementById('errorBox').classList.add('show');
+  document.getElementById('verifyBtn').disabled = true;
+}
+
+async function doVerify() {
+  const code = document.getElementById('code').value.trim();
+  const btn = document.getElementById('verifyBtn');
+  document.getElementById('errorBox').classList.remove('show');
+
+  if (!code || !/^\d{6}$/.test(code)) {
+    showErr('Please enter a valid 6-digit code.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+
+  try {
+    const res = await fetch('/api/verify-registration', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({temp_token: tempToken, code})
+    });
+    const data = await res.json();
+    
+    if (res.ok) {
+      document.getElementById('successBox').classList.add('show');
+      setTimeout(() => window.location.href = 'login.html', 1500);
+    } else {
+      showErr(data.error || 'Verification failed.');
+    }
+  } catch {
+    showErr('Connection error. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Verify Account';
+  }
+}
+
+async function resendCode() {
+  const btn = document.getElementById('resendBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    const res = await fetch('/api/resend-verification', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({temp_token: tempToken})
+    });
+    const data = await res.json();
+    
+    if (res.ok) {
+      showMsg('New code sent successfully!');
+    } else {
+      showErr(data.error || 'Failed to resend code.');
+    }
+  } catch {
+    showErr('Connection error. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Resend Code';
+  }
+}
+
+function showErr(msg) {
+  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('errorBox').style.background = 'rgba(244,71,71,.1)';
+  document.getElementById('errorBox').style.borderColor = 'rgba(244,71,71,.3)';
+  document.getElementById('errorBox').style.color = 'var(--rogue)';
+  document.getElementById('errorBox').classList.add('show');
+}
+
+function showMsg(msg) {
+  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('errorBox').style.background = 'rgba(78,201,176,.1)';
+  document.getElementById('errorBox').style.borderColor = 'rgba(78,201,176,.3)';
+  document.getElementById('errorBox').style.color = 'var(--accent)';
+  document.getElementById('errorBox').classList.add('show');
+}
+
+document.getElementById('code').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') doVerify();
+});
+</script>
+</body>
+</html>

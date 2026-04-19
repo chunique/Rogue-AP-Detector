@@ -79,6 +79,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:14px;color:var(--text2)}
 .hidden{display:none!important}
+
+.filter-section{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end}
+.filter-group{display:flex;flex-direction:column;gap:6px}
+.filter-label{font-size:12px;font-weight:500;color:var(--muted)}
+.filter-input{padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;min-width:200px}
+.filter-input:focus{outline:none;border-color:var(--accent)}
+.filter-btn{padding:10px 20px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.filter-btn:hover{background:var(--accent-light)}
+.filter-btn-clear{padding:10px 20px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.filter-count{font-size:12px;color:var(--muted);margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -102,7 +112,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Management</div>
-        <a href="whitelist.html" class="nav-item">Access Points</a>
+        <a href="users.html" class="nav-item" id="navUsers">Users</a>
+        <a href="whitelist.html" class="nav-item" id="navAccessPoints">Access Points</a>
         <a href="reports.html" class="nav-item active">Reports</a>
       </div>
     </nav>
@@ -111,7 +122,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="user-avatar" id="userAvatar">A</div>
         <div class="user-info">
           <div class="user-name" id="userName">Admin</div>
-          <div class="user-role">Administrator</div>
+          <div class="user-role" id="userRole">Administrator</div>
         </div>
         <button class="logout-btn" onclick="logout()">↩</button>
       </div>
@@ -151,6 +162,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <button class="btn btn-secondary btn-sm" onclick="loadHistory()">↻ Refresh</button>
       </div>
       <div class="card-body">
+        <div class="filter-section">
+          <div class="filter-group">
+            <label class="filter-label">Search by BSSID (MAC Address)</label>
+            <input type="text" class="filter-input" id="filterBssid" placeholder="e.g. aa:bb:cc:dd:ee:ff" onkeyup="applyFilters()">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Filter by Date</label>
+            <input type="date" class="filter-input" id="filterDate" onchange="applyFilters()">
+          </div>
+          <button class="filter-btn" onclick="applyFilters()">🔍 Filter</button>
+          <button class="filter-btn-clear" onclick="clearFilters()">✕ Clear</button>
+        </div>
+        <div class="filter-count" id="filterCount"></div>
         <div id="histList"><div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Loading...</div></div></div>
       </div>
     </div>
@@ -160,12 +184,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 <div class="loading hidden" id="loading"><div class="loading-spinner"></div><div class="loading-text" id="loadingText">Processing...</div></div>
 
 <script>
-let currentScanId=null;
+let currentScanId=null,allScans=[];
 const api=(path,opts={})=>{const method=opts.method||'GET';const body=opts.body?JSON.stringify(opts.body):undefined;return fetch(path,{method,headers:{'Content-Type':'application/json',...opts.headers},credentials:'include',body}).then(async r=>{const t=await r.text();try{return JSON.parse(t)}catch{return{error:t}}})};
-(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;currentScanId=sessionStorage.getItem('currentScanId');if(currentScanId){showLoading(true,'');try{const res=await api(`/api/history/${currentScanId}`);if(res&&!res.error){document.getElementById('currentMeta').textContent=`${new Date(res.timestamp).toLocaleString()} · ${res.source_files.join(', ')} · ${res.stats.rogue_count} Rogue · ${res.stats.suspicious_count} Suspicious`;document.getElementById('currentCard').classList.remove('hidden');document.getElementById('noCurrent').style.display='none';}}finally{showLoading(false);}}loadHistory();})();
+(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;document.getElementById('userRole').textContent=me.role==='admin'?'Administrator':'User';if(me.role!=='admin'){document.getElementById('navUsers').style.display='none';document.getElementById('navAccessPoints').style.display='none';}currentScanId=sessionStorage.getItem('currentScanId');if(currentScanId){showLoading(true,'');try{const res=await api(`/api/history/${currentScanId}`);if(res&&!res.error){const sf=Array.isArray(res.source_files)?res.source_files.join(', '):res.source_files;document.getElementById('currentMeta').textContent=`${new Date(res.timestamp).toLocaleString()} · ${sf} · ${res.stats.rogue_count} Rogue · ${res.stats.suspicious_count} Suspicious`;document.getElementById('currentCard').classList.remove('hidden');document.getElementById('noCurrent').style.display='none';}}finally{showLoading(false);}}loadHistory();})();
 function logout(){api('/api/logout',{method:'POST'});window.location.href='/login.html';}
 
-async function loadHistory(){try{const scans=await api('/api/history');const el=document.getElementById('histList');if(!scans||!scans.length){el.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No scans yet. Run your first scan to generate reports.</div></div>';return;}el.innerHTML=scans.map(s=>`<div class="scan-item"><div class="scan-icon">${s.rogue_count>0?'🚨':s.susp_count>0?'⚠️':'✅'}</div><div class="scan-info"><div class="scan-time">${new Date(s.timestamp).toLocaleString()}</div><div class="scan-files">${s.source_files}</div><div class="scan-badges">${s.rogue_count>0?`<span class="scan-badge badge-r">${s.rogue_count} Rogue</span>`:''}${s.susp_count>0?`<span class="scan-badge badge-s">${s.susp_count} Susp</span>`:''}<span class="scan-badge badge-f">${s.total_frames} Frames</span></div></div><div class="scan-actions"><button class="dl-btn" onclick="dlPDF('${s.scan_id}')">📄 PDF</button><button class="dl-btn" onclick="dlCSV('${s.scan_id}')">📊 CSV</button></div></div>`).join('');}catch(e){showToast('Failed to load history','error');}}
+async function loadHistory(){showLoading(true);try{const res=await api('/api/history?all=true');console.log('API Response:', res);const scans=Array.isArray(res)?res:(res&&res.data)||[];if(!scans.length&&allScans.length===0){document.getElementById('histList').innerHTML='<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No scans found. Run a scan to get started.</div></div>';document.getElementById('filterCount').textContent='';}else{allScans=scans;applyFilters();}}catch(e){console.error('Error loading history:', e);showToast('Error loading history: '+e.message,'error');}finally{showLoading(false);}}
+
+function applyFilters(){const bssidFilter=document.getElementById('filterBssid').value.trim().toLowerCase();const filterDate=document.getElementById('filterDate').value;const filtered=allScans.filter(s=>{const scanDate=new Date(s.timestamp);if(filterDate){const selectedDate=new Date(filterDate);const sameDay=scanDate.getFullYear()===selectedDate.getFullYear()&&scanDate.getMonth()===selectedDate.getMonth()&&scanDate.getDate()===selectedDate.getDate();if(!sameDay)return false;}if(bssidFilter){const bssidMatch=s.bssid_list&&s.bssid_list.some(b=>b.toLowerCase().includes(bssidFilter));if(!bssidMatch)return false;}return true;});renderScans(filtered);document.getElementById('filterCount').textContent=`Showing ${filtered.length} of ${allScans.length} scans`;}
+
+function clearFilters(){document.getElementById('filterBssid').value='';document.getElementById('filterDate').value='';applyFilters();}
+
+function renderScans(scans){const el=document.getElementById('histList');if(!scans||!scans.length){el.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No scans match your filters</div></div>';return;}el.innerHTML=scans.map(s=>`<div class="scan-item"><div class="scan-icon">${s.rogue_count>0?'🚨':s.susp_count>0?'⚠️':'✅'}</div><div class="scan-info"><div class="scan-time">${new Date(s.timestamp).toLocaleString()}</div><div class="scan-files">${s.source_files}</div><div class="scan-badges">${s.rogue_count>0?`<span class="scan-badge badge-r">${s.rogue_count} Rogue</span>`:''}${s.susp_count>0?`<span class="scan-badge badge-s">${s.susp_count} Susp</span>`:''}<span class="scan-badge badge-f">${s.total_frames} Frames</span></div></div><div class="scan-actions"><button class="dl-btn" onclick="dlPDF('${s.scan_id}')">📄 PDF</button><button class="dl-btn" onclick="dlCSV('${s.scan_id}')">📊 CSV</button></div></div>`).join('');}
+
 async function dlPDF(id){showToast('Generating PDF...');window.location.href=`/api/report/${id}`;}
 async function dlCSV(id){showToast('Preparing CSV...');window.location.href=`/api/export/${id}/csv`;}
 function showLoading(show,msg='Processing...'){document.getElementById('loading').classList.toggle('hidden',!show);document.getElementById('loadingText').textContent=msg;}

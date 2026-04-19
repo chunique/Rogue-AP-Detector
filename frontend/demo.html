@@ -72,8 +72,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .finding-badge.rogue{background:rgba(244,71,71,0.2);color:var(--rogue);border:1px solid rgba(244,71,71,0.3)}
 .finding-badge.suspicious{background:rgba(206,145,120,0.2);color:var(--suspicious);border:1px solid rgba(206,145,120,0.3)}
 .finding-body{flex:1}
-.finding-rule{font-size:13px;font-weight:600}
-.finding-detail{font-size:12px;color:var(--text2);margin-top:2px}
+.finding-bssid{font-family:'Consolas',monospace;font-size:12px;color:var(--accent);margin-top:4px}
+.finding-issues{margin-top:8px;padding:8px;background:var(--surface3);border-radius:4px;font-size:11px}
+.finding-issue{margin-bottom:4px}
+.finding-issue:last-child{margin-bottom:0}
 
 .action-buttons{display:flex;gap:12px;justify-content:center;margin-top:24px}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-weight:500;font-size:13px;cursor:pointer;border:none;transition:all .2s;text-decoration:none}
@@ -112,7 +114,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Management</div>
-        <a href="whitelist.html" class="nav-item">Access Points</a>
+        <a href="users.html" class="nav-item" id="navUsers">Users</a>
+        <a href="whitelist.html" class="nav-item" id="navAccessPoints">Access Points</a>
         <a href="reports.html" class="nav-item">Reports</a>
       </div>
     </nav>
@@ -121,7 +124,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="user-avatar" id="userAvatar">A</div>
         <div class="user-info">
           <div class="user-name" id="userName">Admin</div>
-          <div class="user-role">Administrator</div>
+          <div class="user-role" id="userRole">Administrator</div>
         </div>
         <button class="logout-btn" onclick="logout()">↩</button>
       </div>
@@ -137,7 +140,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     <div class="hero">
       <div class="hero-icon">📊</div>
       <div class="hero-title">Run <span>Demo Analysis</span></div>
-      <div class="hero-desc">Analyze real WiFi capture data from Belgian train stations. The demo uses two pre-loaded datasets containing 97,290 frames total, processed through ML-based anomaly detection.</div>
+      <div class="hero-desc">Analyze sample WiFi capture data. The demo uses pre-loaded datasets containing 32 sample frames demonstrating various detection scenarios including rogue, suspicious, and whitelisted access points.</div>
     </div>
 
     <div class="card">
@@ -146,20 +149,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="dataset-grid">
           <div class="dataset-card">
             <div class="dataset-icon">🚄</div>
-            <div class="dataset-name">Train Station Capture 1</div>
-            <div class="dataset-desc">WiFi frames captured at Belgian train station location 1</div>
+            <div class="dataset-name">Sample Dataset 1</div>
+            <div class="dataset-desc">Sample WiFi frames demonstrating detection rules</div>
             <div class="dataset-stats">
-              <div class="dataset-stat"><div class="dataset-stat-value" style="color:var(--accent)">36,000</div><div class="dataset-stat-label">Frames</div></div>
-              <div class="dataset-stat"><div class="dataset-stat-value">~2,100</div><div class="dataset-stat-label">Unique BSSIDs</div></div>
+              <div class="dataset-stat"><div class="dataset-stat-value" style="color:var(--accent)">16</div><div class="dataset-stat-label">Frames</div></div>
+              <div class="dataset-stat"><div class="dataset-stat-value">12</div><div class="dataset-stat-label">Unique BSSIDs</div></div>
             </div>
           </div>
           <div class="dataset-card">
             <div class="dataset-icon">🚉</div>
-            <div class="dataset-name">Train Station Capture 2</div>
-            <div class="dataset-desc">WiFi frames captured at Belgian train station location 2</div>
+            <div class="dataset-name">Sample Dataset 2</div>
+            <div class="dataset-desc">Sample WiFi frames demonstrating detection rules</div>
             <div class="dataset-stats">
-              <div class="dataset-stat"><div class="dataset-stat-value" style="color:var(--accent)">61,290</div><div class="dataset-stat-label">Frames</div></div>
-              <div class="dataset-stat"><div class="dataset-stat-value">~2,300</div><div class="dataset-stat-label">Unique BSSIDs</div></div>
+              <div class="dataset-stat"><div class="dataset-stat-value" style="color:var(--accent)">16</div><div class="dataset-stat-label">Frames</div></div>
+              <div class="dataset-stat"><div class="dataset-stat-value">14</div><div class="dataset-stat-label">Unique BSSIDs</div></div>
             </div>
           </div>
         </div>
@@ -197,10 +200,10 @@ const api=(path,opts={})=>{const method=opts.method||'GET';const body=opts.body?
 function showLoading(show,msg='Processing...'){document.getElementById('loading').classList.toggle('hidden',!show);document.getElementById('loadingText').textContent=msg;}
 function logout(){api('/api/logout',{method:'POST'});window.location.href='/login.html';}
 
-(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;})();
+(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;document.getElementById('userRole').textContent=me.role==='admin'?'Administrator':'User';if(me.role!=='admin'){document.getElementById('navUsers').style.display='none';document.getElementById('navAccessPoints').style.display='none';}})();
 
-async function runDemo(){showLoading(true,'Running demo analysis on 97,290 frames...');try{const d=await api('/api/demo');if(d.error){showToast(d.error,'error');showLoading(false);return;}sessionStorage.setItem('demoResults',JSON.stringify(d));sessionStorage.setItem('currentScanId',d.scan_id||'demo');renderResults(d);showLoading(false);showToast('Demo analysis complete!','success');}catch(e){showToast('Error: '+e.message,'error');showLoading(false);}}
-function renderResults(d){document.getElementById('resultsSection').classList.remove('hidden');document.getElementById('rFrames').textContent=(d.stats?.total_frames||0).toLocaleString();document.getElementById('rBSSIDs').textContent=d.stats?.unique_bssids||0;document.getElementById('rRogues').textContent=d.stats?.rogue_count||0;document.getElementById('rSusp').textContent=d.stats?.suspicious_count||0;const findings=d.findings||[];document.getElementById('findingCount').textContent=`${findings.length} total findings`;document.getElementById('findingsPreview').innerHTML=findings.slice(0,8).map(f=>`<div class="finding-item"><div class="finding-badge ${f.severity==='HIGH'?'rogue':'suspicious'}">${f.severity}</div><div class="finding-body"><div class="finding-rule">${f.rule}</div><div class="finding-detail">${f.detail}</div></div></div>`).join('');}
+async function runDemo(){showLoading(true,'Running demo analysis on sample data...');try{const d=await api('/api/demo');if(d.error){showToast(d.error,'error');showLoading(false);return;}sessionStorage.setItem('demoResults',JSON.stringify(d));sessionStorage.setItem('currentScanId',d.session_id||'demo');renderResults(d);showLoading(false);showToast('Demo analysis complete!','success');}catch(e){showToast('Error: '+e.message,'error');showLoading(false);}}
+function renderResults(d){document.getElementById('resultsSection').classList.remove('hidden');document.getElementById('rFrames').textContent=(d.stats?.total_frames||0).toLocaleString();document.getElementById('rBSSIDs').textContent=d.stats?.unique_bssids||0;document.getElementById('rRogues').textContent=d.stats?.rogue_count||0;document.getElementById('rSusp').textContent=d.stats?.suspicious_count||0;const bssidList=Object.values(d.bssid_scores||{}).slice(0,8);document.getElementById('findingCount').textContent=`${bssidList.length} access points with issues`;document.getElementById('findingsPreview').innerHTML=bssidList.map(bssid=>{const issues=(bssid.findings||[]).slice(0,3).map(f=>`<div class="finding-issue">${f.rule} (${f.severity})</div>`).join('');return`<div class="finding-item"><div class="finding-badge ${bssid.verdict==='ROGUE'?'rogue':'suspicious'}">${bssid.verdict}<br><span style="font-size:10px">Score: ${bssid.score}</span></div><div class="finding-body"><div class="finding-bssid">BSSID: ${bssid.bssid} · ${(bssid.ssids||[]).join(', ') || 'N/A'}</div><div class="finding-issues">${issues}</div></div></div>`;}).join('');}
 function viewFullResults(){window.location.href='results.html?demo=1';}
 function showToast(msg,type='success'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:24px;right:24px;padding:14px 20px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);font-size:14px;z-index:1001';if(type==='error')t.style.borderColor='var(--rogue)',t.style.color='var(--rogue)';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
 </script>

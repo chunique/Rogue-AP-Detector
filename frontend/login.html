@@ -5,61 +5,65 @@
 <title>RogueShield — Sign In</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root{--blue-50:#eff6ff;--blue-100:#dbeafe;--blue-200:#bfdbfe;--blue-500:#3b82f6;--blue-600:#2563eb;--blue-700:#1d4ed8;--slate-50:#f8fafc;--slate-100:#f1f5f9;--slate-200:#e2e8f0;--slate-300:#cbd5e1;--slate-400:#94a3b8;--slate-500:#64748b;--slate-600:#475569;--slate-700:#334155;--slate-800:#1e293b;--slate-900:#0f172a;--red-50:#fef2f2;--red-100:#fee2e2;--red-400:#f87171;--red-500:#ef4444;--red-600:#dc2626;--green-50:#f0fdf4;--green-500:#22c55e;--border:#e2e8f0;--shadow-xl:0 20px 25px rgba(0,0,0,.10),0 10px 10px rgba(0,0,0,.04);}
+:root{
+  --bg:#1E1E1E;--surface:#2D2D2D;--surface2:#3D3D3D;--surface3:#4A4A4A;
+  --border:#404040;--accent:#4EC9B0;--accent-light:#6EE7D0;
+  --safe:#4EC9B0;--suspicious:#CE9178;--rogue:#F44747;
+  --text:#E0E0E0;--text2:#A0A0A0;--muted:#6B6B6B;
+  --radius:10px;--shadow:0 2px 8px rgba(0,0,0,0.3);
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased}
-body{background:var(--slate-100);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(var(--slate-200) 1px,transparent 1px);background-size:28px 28px;opacity:.6;pointer-events:none}
+body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;color:var(--text)}
 .auth-wrap{position:relative;z-index:1;width:100%;max-width:420px}
-.auth-brand{text-align:center;margin-bottom:28px}
-.brand-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:10px}
-.brand-icon{width:44px;height:44px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(37,99,235,.35)}
-.brand-name{font-size:22px;font-weight:700;color:var(--slate-900);letter-spacing:-.4px}
-.brand-tagline{font-size:13px;color:var(--slate-500)}
-.auth-card{background:white;border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:var(--shadow-xl)}
-.auth-heading{font-size:20px;font-weight:700;color:var(--slate-900);margin-bottom:4px}
-.auth-sub{font-size:13px;color:var(--slate-500);margin-bottom:24px}
+.auth-brand{text-align:center;margin-bottom:32px}
+.brand-mark{display:inline-flex;align-items:center;gap:12px;margin-bottom:8px}
+.brand-icon{width:48px;height:48px;background:linear-gradient(135deg,#4EC9B0,#2E8B7A);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(78,201,176,.3)}
+.brand-name{font-size:24px;font-weight:700;color:var(--text)}
+.brand-tagline{font-size:13px;color:var(--muted);margin-top:4px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:var(--shadow)}
+.auth-heading{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
 .form-group{margin-bottom:16px}
-.form-label{display:block;font-size:13px;font-weight:500;color:var(--slate-700);margin-bottom:6px}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px}
 .input-wrap{position:relative}
-.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--slate-800);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;background:white}
-.form-input:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
-.form-input.has-icon{padding-left:38px}
-.input-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--slate-400);pointer-events:none}
-.toggle-pw{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--slate-400);font-size:13px;padding:2px 4px;transition:color .15s}
-.toggle-pw:hover{color:var(--slate-600)}
-.error-box{display:none;align-items:center;gap:8px;padding:10px 12px;background:var(--red-50);border:1px solid var(--red-100);border-radius:8px;font-size:12.5px;color:var(--red-700);margin-bottom:14px}
+.form-input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;background:var(--surface2)}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(78,201,176,.15)}
+.form-input.has-icon{padding-left:42px}
+.form-input::placeholder{color:var(--muted)}
+.input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted);pointer-events:none}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:4px 6px;border-radius:4px;transition:all .15s}
+.toggle-pw:hover{color:var(--accent)}
+.error-box{display:none;align-items:center;gap:10px;padding:12px 14px;background:rgba(244,71,71,.1);border:1px solid rgba(244,71,71,.3);border-radius:8px;font-size:13px;color:var(--rogue);margin-bottom:16px}
 .error-box.show{display:flex}
-.btn-submit{width:100%;padding:11px;background:linear-gradient(135deg,var(--blue-600),var(--blue-700));color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;margin-top:4px;box-shadow:0 1px 3px rgba(37,99,235,.3)}
-.btn-submit:hover{box-shadow:0 4px 12px rgba(37,99,235,.4);transform:translateY(-1px)}
+.btn-submit{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#2E8B7A);color:var(--bg);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;margin-top:8px;box-shadow:0 2px 8px rgba(78,201,176,.25)}
+.btn-submit:hover{box-shadow:0 4px 14px rgba(78,201,176,.35);transform:translateY(-1px)}
 .btn-submit:active{transform:translateY(0)}
 .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
-.auth-footer{text-align:center;margin-top:20px;font-size:12.5px;color:var(--slate-500)}
-.auth-footer a{color:var(--blue-600);font-weight:500;text-decoration:none}
+.auth-footer{text-align:center;margin-top:24px;font-size:13px;color:var(--muted)}
+.auth-footer a{color:var(--accent);font-weight:500;text-decoration:none}
 .auth-footer a:hover{text-decoration:underline}
-.demo-info{margin-top:20px;padding:12px 14px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:8px}
-.demo-info p{font-size:12px;color:var(--blue-700);line-height:1.5}
-.demo-info code{background:var(--blue-100);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:11px}
-.divider{display:flex;align-items:center;gap:10px;margin:18px 0;font-size:12px;color:var(--slate-400)}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.page-footer{text-align:center;margin-top:20px;font-size:11px;color:var(--slate-400)}
+.demo-info{margin-top:20px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px}
+.demo-info p{font-size:12.5px;color:var(--text2);line-height:1.5}
+.demo-info code{background:var(--surface3);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:11px;color:var(--accent)}
 
 .hidden{display:none!important}
 
 #step2{text-align:center}
-.code-sent{background:var(--blue-50);border:1px solid var(--blue-100);border-radius:8px;padding:16px;margin-bottom:20px;text-align:center}
-.code-sent p{font-size:13px;color:var(--blue-700);line-height:1.5}
-.code-input{display:flex;gap:8px;justify-content:center;margin:20px 0}
-.code-digit{width:48px;height:56px;border:2px solid var(--border);border-radius:10px;font-size:24px;font-weight:700;text-align:center;transition:all .2s}
-.code-digit:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,130,246,.15);outline:none}
-.timer{font-size:13px;color:var(--slate-500);margin-bottom:16px}
-.timer strong{color:var(--blue-600)}
-.resend-btn{background:none;border:none;color:var(--blue-600);font-size:13px;cursor:pointer;font-weight:500;padding:4px 8px;border-radius:4px;transition:background .15s}
-.resend-btn:hover{background:var(--blue-50)}
-.resend-btn:disabled{color:var(--slate-400);cursor:not-allowed}
-.back-link{display:block;text-align:center;margin-top:16px;font-size:13px;color:var(--slate-500)}
-.back-link:hover{color:var(--blue-600)}
-.success-box{display:none;align-items:center;gap:8px;padding:12px 14px;background:var(--green-50);border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534;margin-bottom:14px;text-align:center;justify-content:center}
+.code-sent{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px;text-align:center}
+.code-sent p{font-size:13px;color:var(--text2);line-height:1.5}
+.code-sent strong{color:var(--accent)}
+.code-input{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.code-digit{width:48px;height:56px;border:2px solid var(--border);border-radius:10px;font-size:24px;font-weight:700;text-align:center;color:var(--text);background:var(--surface2);transition:all .2s}
+.code-digit:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(78,201,176,.15);outline:none}
+.timer{font-size:13px;color:var(--muted);margin-bottom:16px}
+.timer strong{color:var(--accent)}
+.resend-btn{background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-weight:500;padding:6px 10px;border-radius:4px;transition:background .15s}
+.resend-btn:hover{background:var(--surface2)}
+.resend-btn:disabled{color:var(--muted);cursor:not-allowed}
+.back-link{display:block;text-align:center;margin-top:16px;font-size:13px;color:var(--muted)}
+.back-link:hover{color:var(--accent)}
+.success-box{display:none;align-items:center;gap:8px;padding:14px 16px;background:rgba(78,201,176,.1);border:1px solid rgba(78,201,176,.3);border-radius:8px;font-size:13px;color:var(--accent);margin-bottom:16px;text-align:center;justify-content:center}
 .success-box.show{display:flex}
 </style>
 </head>
@@ -100,14 +104,6 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     </div>
 
     <button class="btn-submit" id="loginBtn" onclick="doLogin()">Sign In</button>
-
-    <div class="divider">or</div>
-
-    <div class="demo-info">
-      <p><strong>Demo credentials:</strong><br>
-      Username: <code>admin</code> &nbsp; Password: <code>Admin@1234</code><br>
-      Email: <code>admin@gmail.com</code></p>
-    </div>
   </div>
 
   <!-- Step 2: 2FA Verification -->
@@ -140,7 +136,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <button class="btn-submit" id="verifyBtn" onclick="verifyCode()">Verify Code</button>
 
     <button class="resend-btn" id="resendBtn" onclick="resendCode()" disabled>Resend Code</button>
-    <span id="resendTimer" style="font-size:12px;color:var(--slate-400);margin-left:4px"></span>
+    <span id="resendTimer" style="font-size:12px;color:var(--muted);margin-left:4px"></span>
 
     <a href="#" class="back-link" onclick="backToLogin()">← Back to login</a>
   </div>
@@ -148,10 +144,6 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
   <div class="auth-footer">
     <a href="forgot-password.html" style="margin-right:15px">Forgot password?</a>
     Don't have an account? <a href="register.html">Create one →</a>
-  </div>
-
-  <div class="page-footer">
-    Meru University of Science and Technology &nbsp;·&nbsp; CT206/109336/22 &nbsp;·&nbsp; Dr. Dorothy Bundi
   </div>
 </div>
 
@@ -323,7 +315,7 @@ function startCountdown() {
     if (seconds <= 0) {
       clearInterval(countdownInterval);
       document.getElementById('countdown').textContent = 'Expired';
-      document.getElementById('countdown').style.color = 'var(--red-500)';
+      document.getElementById('countdown').style.color = 'var(--rogue)';
       showErr('Code expired. Click "Resend Code" to get a new one.', 2);
     }
     seconds--;

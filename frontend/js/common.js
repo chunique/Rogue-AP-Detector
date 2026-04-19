@@ -7,8 +7,9 @@ const PAGES = [
   { id:'results',      href:'results.html',      icon:'≡',  label:'Detection Results',group:'ANALYSIS' },
   { id:'risk_summary', href:'risk_summary.html', icon:'◎',  label:'Risk Summary',     group:'ANALYSIS' },
   { id:'reports',      href:'reports.html',      icon:'↓',  label:'Download Reports', group:'ANALYSIS' },
-  { id:'whitelist',    href:'whitelist.html',    icon:'✓',  label:'Whitelist',        group:'MANAGE' },
+  { id:'whitelist',    href:'whitelist.html',    icon:'✓',  label:'Access Points',    group:'MANAGE' },
   { id:'history',      href:'history.html',      icon:'◷',  label:'Scan History',     group:'MANAGE' },
+  { id:'users',        href:'users.html',        icon:'⚙',  label:'Users',            group:'ADMIN', adminOnly: true },
 ];
 
 /* ── Auth ──────────────────────────────────────────────────────────── */
@@ -30,7 +31,9 @@ function renderNav(currentId, user) {
   const sb = document.getElementById('sidebar');
   if (!sb) return;
 
-  const groups = [...new Set(PAGES.map(p=>p.group))];
+  const isAdmin = user?.role === 'admin';
+  const visiblePages = PAGES.filter(p => !p.adminOnly || isAdmin);
+  const groups = [...new Set(visiblePages.map(p=>p.group))];
   const initial = (user?.username||'A')[0].toUpperCase();
 
   let html = `
@@ -38,14 +41,13 @@ function renderNav(currentId, user) {
       <div class="brand-icon">🛡</div>
       <div>
         <div class="brand-name">RogueShield</div>
-        <div class="brand-sub">MUST · CT206/109336/22</div>
       </div>
     </div>
     <nav class="sidebar-nav">`;
 
   groups.forEach(g => {
     html += `<div class="nav-group"><div class="nav-group-label">${g}</div>`;
-    PAGES.filter(p=>p.group===g).forEach(p => {
+    visiblePages.filter(p=>p.group===g).forEach(p => {
       const active = p.id===currentId ? ' active' : '';
       html += `<a class="nav-item${active}" href="${p.href}">
         <span class="nav-icon">${p.icon}</span>

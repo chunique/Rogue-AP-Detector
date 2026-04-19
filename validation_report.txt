@@ -1,0 +1,9 @@
+Rogue AP Detection Validation Report
+Generated: Validation run
+Dataset: Belgian Train Station
+Frames: 97,290
+
+Results:
+  Rogue APs: 38
+  Suspicious: 14
+  Total Findings: 8544

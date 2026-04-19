@@ -96,7 +96,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Management</div>
-        <a href="whitelist.html" class="nav-item">Access Points</a>
+        <a href="users.html" class="nav-item" id="navUsers">Users</a>
+        <a href="whitelist.html" class="nav-item" id="navAccessPoints">Access Points</a>
         <a href="reports.html" class="nav-item">Reports</a>
       </div>
     </nav>
@@ -105,7 +106,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="user-avatar" id="userAvatar">A</div>
         <div class="user-info">
           <div class="user-name" id="userName">Admin</div>
-          <div class="user-role">Administrator</div>
+          <div class="user-role" id="userRole">Administrator</div>
         </div>
         <button class="logout-btn" onclick="logout()">↩</button>
       </div>
@@ -138,7 +139,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 <script>
 let scans=[],currentPage=1,perPage=10;
 const api=(path,opts={})=>{const method=opts.method||'GET';const body=opts.body?JSON.stringify(opts.body):undefined;return fetch(path,{method,headers:{'Content-Type':'application/json',...opts.headers},credentials:'include',body}).then(async r=>{const t=await r.text();try{return JSON.parse(t)}catch{return{error:t}}})};
-(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;loadHistory();})();
+(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;document.getElementById('userRole').textContent=me.role==='admin'?'Administrator':'User';if(me.role!=='admin'){document.getElementById('navUsers').style.display='none';document.getElementById('navAccessPoints').style.display='none';}loadHistory();})();
 function logout(){api('/api/logout',{method:'POST'});window.location.href='/login.html';}
 
 async function loadHistory(page=1){currentPage=page;showLoading(true);try{const d=await api(`/api/history?page=${page}&per_page=${perPage}`);scans=d.data||[];renderTable();}catch(e){console.error(e);}finally{showLoading(false);}}

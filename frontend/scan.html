@@ -48,6 +48,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .file-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .file-chip{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:13px}
 .file-chip button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;padding:0;line-height:1}
+.file-chip button:hover{color:var(--rogue)}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;font-weight:500;font-size:14px;cursor:pointer;border:none;transition:all .2s;text-decoration:none}
 .btn-primary{background:var(--accent);color:var(--bg)}
 .btn-primary:hover{box-shadow:0 4px 12px rgba(78,201,176,0.3)}
@@ -93,7 +94,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Management</div>
-        <a href="whitelist.html" class="nav-item">Access Points</a>
+        <a href="users.html" class="nav-item" id="navUsers">Users</a>
+        <a href="whitelist.html" class="nav-item" id="navAccessPoints">Access Points</a>
         <a href="reports.html" class="nav-item">Reports</a>
       </div>
     </nav>
@@ -102,7 +104,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="user-avatar" id="userAvatar">A</div>
         <div class="user-info">
           <div class="user-name" id="userName">Admin</div>
-          <div class="user-role">Administrator</div>
+          <div class="user-role" id="userRole">Administrator</div>
         </div>
         <button class="logout-btn" onclick="logout()">↩</button>
       </div>
@@ -122,7 +124,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
           <input type="file" id="fileInput" accept=".csv" multiple/>
           <div class="upload-icon">📁</div>
           <div class="upload-title">Drop CSV files here or click to browse</div>
-          <div class="upload-sub">Supports Scapy-generated 802.11 wireless capture files</div>
+          <div class="upload-sub">Only CSV files accepted · Click × to remove a file</div>
           <div class="file-list" id="fileList"></div>
         </div>
         <div style="margin-top:24px;display:flex;gap:12px">
@@ -154,7 +156,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 <script>
 let uploadedFiles=[];
 const api=(path,opts={})=>{const method=opts.method||'GET';const body=opts.body?JSON.stringify(opts.body):undefined;return fetch(path,{method,headers:{'Content-Type':'application/json',...opts.headers},credentials:'include',body}).then(async r=>{const t=await r.text();try{return JSON.parse(t)}catch{return{error:t}}})};
-(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;})();
+(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;document.getElementById('userRole').textContent=me.role==='admin'?'Administrator':'User';if(me.role!=='admin'){document.getElementById('navUsers').style.display='none';document.getElementById('navAccessPoints').style.display='none';}})();
 function logout(){api('/api/logout',{method:'POST'});window.location.href='/login.html';}
 
 const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),fileList=document.getElementById('fileList');
@@ -163,8 +165,36 @@ dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over')
 dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');handleFiles(e.dataTransfer.files);});
 fileInput.addEventListener('change',e=>handleFiles(e.target.files));
 
-function handleFiles(files){Array.from(files).forEach(f=>{if(f.name.endsWith('.csv')&&!uploadedFiles.find(x=>x.name===f.name))uploadedFiles.push(f);});renderFileList();}
-function renderFileList(){fileList.innerHTML=uploadedFiles.length?uploadedFiles.map((f,i)=>`<div class="file-chip">📄 ${f.name}<button onclick="removeFile(${i})">×</button></div>`).join(''):'';}
+function handleFiles(files){
+  let invalidCount = 0;
+  let duplicateCount = 0;
+  Array.from(files).forEach(f=>{
+    if(!f.name.endsWith('.csv')){
+      invalidCount++;
+    } else if(uploadedFiles.find(x=>x.name===f.name)){
+      duplicateCount++;
+    } else {
+      uploadedFiles.push(f);
+    }
+  });
+  if(invalidCount > 0) toast(`${invalidCount} file(s) rejected - only CSV files allowed`, 'error');
+  if(duplicateCount > 0) toast(`${duplicateCount} file(s) already selected`, 'error');
+  if(invalidCount === 0 && duplicateCount === 0 && files.length > 0) toast(`${files.length} file(s) added`, 'success');
+  renderFileList();
+}
+function renderFileList(){
+  if(uploadedFiles.length === 0){
+    fileList.innerHTML = '';
+    return;
+  }
+  fileList.innerHTML = uploadedFiles.map((f,i)=>`
+    <div class="file-chip">
+      <span>📄 ${f.name}</span>
+      <button onclick="removeFile(${i})" title="Remove file">×</button>
+    </div>
+  `).join('');
+  fileList.innerHTML += `<div style="margin-top:8px;font-size:12px;color:var(--muted);">${uploadedFiles.length} file(s) selected</div>`;
+}
 function removeFile(i){uploadedFiles.splice(i,1);renderFileList();}
 
 async function runScan(){if(!uploadedFiles.length){toast('Please select CSV files','error');return;}showLoading(true,'Running detection...');try{const formData=new FormData();uploadedFiles.forEach(f=>formData.append('captures',f));const r=await fetch('/api/analyse',{method:'POST',body:formData,credentials:'include'});const d=await r.json();if(d.error)throw new Error(d.error);sessionStorage.setItem('scanResults',JSON.stringify(d));sessionStorage.setItem('currentScanId',d.session_id);window.location.href='results.html';}catch(e){toast(e.message,'error');}finally{showLoading(false);}}

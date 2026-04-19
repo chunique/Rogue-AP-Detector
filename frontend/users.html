@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RogueShield — User Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#1E1E1E;--surface:#2D2D2D;--surface2:#3D3D3D;--surface3:#4A4A4A;
+  --border:#404040;--accent:#4EC9B0;--accent-light:#6EE7D0;
+  --safe:#4EC9B0;--suspicious:#CE9178;--rogue:#F44747;
+  --text:#E0E0E0;--text2:#A0A0A0;--muted:#6B6B6B;
+  --radius:10px;--shadow:0 2px 8px rgba(0,0,0,0.3);
+  --sidebar-w:240px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-brand{padding:20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#4EC9B0,#2E8B7A);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{font-weight:700;font-size:18px}
+.logo-text span{color:var(--accent)}
+.sidebar-nav{flex:1;padding:16px 12px}
+.nav-section{margin-bottom:20px}
+.nav-section-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;padding:0 12px;margin-bottom:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text2);font-size:13.5px;font-weight:500;transition:all .15s;text-decoration:none;margin-bottom:2px}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(78,201,176,0.1);color:var(--accent);border:1px solid rgba(78,201,176,0.2)}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.user-avatar{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:600;font-size:13px;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:11px;color:var(--muted)}
+.logout-btn{width:28px;height:28px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s}
+.logout-btn:hover{background:rgba(244,71,71,0.2);border-color:var(--rogue);color:var(--rogue)}
+.main{margin-left:var(--sidebar-w);flex:1;padding:32px;max-width:1200px}
+.page-header{margin-bottom:28px;display:flex;justify-content:space-between;align-items:center}
+.page-title{font-size:28px;font-weight:700}
+.page-subtitle{font-size:14px;color:var(--muted);margin-top:4px}
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:24px}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:600}
+.card-body{padding:0}
+.filters{display:flex;gap:12px;padding:16px 24px;border-bottom:1px solid var(--border)}
+.filter-select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 12px;font-size:13px;min-width:140px}
+.filter-select:focus{outline:none;border-color:var(--accent)}
+.user-table{width:100%;border-collapse:collapse}
+.user-table th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.user-table td{padding:14px 16px;font-size:13.5px;border-bottom:1px solid var(--border);vertical-align:middle}
+.user-table tr:last-child td{border-bottom:none}
+.user-table tr:hover td{background:var(--surface2)}
+.user-info-cell{display:flex;align-items:center;gap:12px}
+.user-avatar-sm{width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:600;font-size:14px;flex-shrink:0}
+.user-details .username{font-weight:600;color:var(--text)}
+.user-details .email{font-size:12px;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-admin{background:rgba(78,201,176,0.15);color:var(--accent)}
+.badge-user{background:var(--surface3);color:var(--text2)}
+.badge-verified{background:rgba(78,201,176,0.15);color:var(--safe)}
+.badge-unverified{background:rgba(206,145,120,0.15);color:var(--suspicious)}
+.badge-active{background:rgba(78,201,176,0.15);color:var(--safe)}
+.badge-inactive{background:rgba(244,71,71,0.15);color:var(--rogue)}
+.action-btns{display:flex;gap:6px;flex-wrap:wrap}
+.action-btn{padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.action-btn.activate{background:rgba(78,201,176,0.15);color:var(--safe);border:1px solid rgba(78,201,176,0.3)}
+.action-btn.activate:hover{background:rgba(78,201,176,0.25)}
+.action-btn.deactivate{background:rgba(244,71,71,0.15);color:var(--rogue);border:1px solid rgba(244,71,71,0.3)}
+.action-btn.deactivate:hover{background:rgba(244,71,71,0.25)}
+.action-btn.verify{background:rgba(78,201,176,0.15);color:var(--safe);border:1px solid rgba(78,201,176,0.3)}
+.action-btn.verify:hover{background:rgba(78,201,176,0.25)}
+.action-btn.unverify{background:rgba(206,145,120,0.15);color:var(--suspicious);border:1px solid rgba(206,145,120,0.3)}
+.action-btn.unverify:hover{background:rgba(206,145,120,0.25)}
+.loading{position:fixed;inset:0;background:rgba(30,30,30,0.95);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px}
+.loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--text2)}
+.hidden{display:none!important}
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);font-size:14px;box-shadow:var(--shadow);transform:translateY(100px);opacity:0;transition:all .3s;z-index:1001}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--rogue);color:var(--rogue)}
+.toast.success{border-color:var(--safe);color:var(--safe)}
+.empty{text-align:center;padding:48px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.stats-row{display:flex;gap:16px;margin-bottom:24px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 24px;flex:1}
+.stat-box-value{font-size:24px;font-weight:700;color:var(--accent)}
+.stat-box-label{font-size:12px;color:var(--muted);margin-top:4px}
+@media(max-width:1024px){.main{padding:16px}.sidebar{transform:translateX(-100%);transition:transform .25s}.sidebar.open{transform:translateX(0)}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-icon">🛡</div>
+      <div class="logo-text">Rogue<span>Shield</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="index.html" class="nav-item">Dashboard</a>
+        <a href="demo.html" class="nav-item">Demo</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Analysis</div>
+        <a href="scan.html" class="nav-item">Scan</a>
+        <a href="history.html" class="nav-item">History</a>
+        <a href="results.html" class="nav-item">Results</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="users.html" class="nav-item active" id="navUsers">Users</a>
+        <a href="whitelist.html" class="nav-item">Access Points</a>
+        <a href="reports.html" class="nav-item">Reports</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Admin</div>
+          <div class="user-role" id="userRole">Administrator</div>
+        </div>
+        <button class="logout-btn" onclick="logout()">↩</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">User Management</div>
+        <div class="page-subtitle">Manage user accounts, roles, and permissions</div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-box-value" id="totalUsers">0</div>
+        <div class="stat-box-label">Total Users</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-value" id="activeUsers">0</div>
+        <div class="stat-box-label">Active</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-value" id="verifiedUsers">0</div>
+        <div class="stat-box-label">Verified</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-value" id="adminUsers">0</div>
+        <div class="stat-box-label">Administrators</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Users</div>
+      </div>
+      <div class="filters">
+        <select class="filter-select" id="filterRole" onchange="filterUsers()">
+          <option value="">All Roles</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+        </select>
+        <select class="filter-select" id="filterStatus" onchange="filterUsers()">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <select class="filter-select" id="filterVerified" onchange="filterUsers()">
+          <option value="">All Verification</option>
+          <option value="verified">Verified</option>
+          <option value="unverified">Unverified</option>
+        </select>
+      </div>
+      <div class="card-body">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Verification</th>
+              <th>Last Login</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTable">
+            <tr><td colspan="6" class="empty">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="loading hidden" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">Processing...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const api=(path,opts={})=>{
+  const method=opts.method||'GET';
+  const body=opts.body?JSON.stringify(opts.body):undefined;
+  return fetch(path,{method,headers:{'Content-Type':'application/json',...opts.headers},credentials:'include',body})
+    .then(async r=>{const t=await r.text();try{return JSON.parse(t)}catch{return{error:t}}});
+};
+
+let allUsers = [];
+
+async function init(){
+  const me=await api('/api/me');
+  if(me.error)return window.location.href='/login.html';
+  if(me.role!=='admin')return window.location.href='/index.html';
+  document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();
+  document.getElementById('userName').textContent=me.username;
+  document.getElementById('userRole').textContent='Administrator';
+  loadUsers();
+}
+
+async function loadUsers(){
+  const users=await api('/api/users');
+  allUsers=users;
+  updateStats(users);
+  renderUsers(users);
+}
+
+function updateStats(users){
+  document.getElementById('totalUsers').textContent=users.length;
+  document.getElementById('activeUsers').textContent=users.filter(u=>u.active==1).length;
+  document.getElementById('verifiedUsers').textContent=users.filter(u=>u.verified==1).length;
+  document.getElementById('adminUsers').textContent=users.filter(u=>u.role=='admin').length;
+}
+
+function filterUsers(){
+  const role=document.getElementById('filterRole').value;
+  const status=document.getElementById('filterStatus').value;
+  const verified=document.getElementById('filterVerified').value;
+  
+  let filtered=allUsers;
+  if(role)filtered=filtered.filter(u=>u.role===role);
+  if(status==='active')filtered=filtered.filter(u=>u.active==1);
+  if(status==='inactive')filtered=filtered.filter(u=>u.active==0);
+  if(verified==='verified')filtered=filtered.filter(u=>u.verified==1);
+  if(verified==='unverified')filtered=filtered.filter(u=>u.verified==0);
+  
+  renderUsers(filtered);
+}
+
+function renderUsers(users){
+  const tbody=document.getElementById('usersTable');
+  if(!users.length){
+    tbody.innerHTML='<tr><td colspan="6" class="empty">No users found</td></tr>';
+    return;
+  }
+  tbody.innerHTML=users.map(u=>`
+    <tr>
+      <td>
+        <div class="user-info-cell">
+          <div class="user-avatar-sm">${u.username[0].toUpperCase()}</div>
+          <div class="user-details">
+            <div class="username">${u.username}</div>
+            <div class="email">${u.email}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge ${u.role==='admin'?'badge-admin':'badge-user'}">${u.role==='admin'?'Admin':'User'}</span></td>
+      <td><span class="badge ${u.active==1?'badge-active':'badge-inactive'}">${u.active==1?'Active':'Inactive'}</span></td>
+      <td><span class="badge ${u.verified==1?'badge-verified':'badge-unverified'}">${u.verified==1?'Verified':'Unverified'}</span></td>
+      <td>${u.last_login?new Date(u.last_login).toLocaleString():'<span style="color:var(--muted)">Never</span>'}</td>
+      <td>
+        <div class="action-btns">
+          ${u.verified==1?
+            `<button class="action-btn unverify" onclick="toggleVerify(${u.id},false)">Revoke</button>`:
+            `<button class="action-btn verify" onclick="toggleVerify(${u.id},true)">Verify</button>`
+          }
+          ${u.active==1?
+            `<button class="action-btn deactivate" onclick="toggleActive(${u.id},false)">Deactivate</button>`:
+            `<button class="action-btn activate" onclick="toggleActive(${u.id},true)">Activate</button>`
+          }
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function toggleActive(userId, activate){
+  const action=activate?'activate':'deactivate';
+  const res=await api(`/api/users/${userId}/${action}`,{method:'POST'});
+  if(res.error){
+    toast(res.error,'error');
+  }else{
+    toast(`User ${activate?'activated':'deactivated'} successfully`,'success');
+    loadUsers();
+  }
+}
+
+async function toggleVerify(userId, verify){
+  const action=verify?'verify':'unverify';
+  const res=await api(`/api/users/${userId}/${action}`,{method:'POST'});
+  if(res.error){
+    toast(res.error,'error');
+  }else{
+    toast(`User ${verify?'verified':'verification revoked'} successfully`,'success');
+    loadUsers();
+  }
+}
+
+function logout(){api('/api/logout',{method:'POST'});window.location.href='/login.html';}
+function showLoading(show,msg='Processing...'){document.getElementById('loading').classList.toggle('hidden',!show);document.getElementById('loadingText').textContent=msg;}
+function toast(msg,type='success'){const t=document.getElementById('toast');t.textContent=(type==='error'?'✗ ':'✓ ')+msg;t.className=`toast show ${type}`;setTimeout(()=>t.classList.remove('show'),3500);}
+
+init();
+</script>
+</body>
+</html>

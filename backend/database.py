@@ -27,15 +27,21 @@ def _valid_email(email: str) -> bool:
 
 def init_db():
     with _conn() as con:
+        existing_cols = [col[1] for col in con.execute("PRAGMA table_info(users)").fetchall()]
+        if "active" not in existing_cols:
+            con.execute("ALTER TABLE users ADD COLUMN active INTEGER DEFAULT 1")
+    with _conn() as con:
         con.executescript("""
             CREATE TABLE IF NOT EXISTS users (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
                 username      TEXT NOT NULL UNIQUE,
                 email         TEXT NOT NULL UNIQUE,
                 password_hash TEXT NOT NULL,
-                role          TEXT DEFAULT 'admin',
+                role          TEXT DEFAULT 'user',
                 created_at    TEXT NOT NULL,
-                last_login    TEXT
+                last_login    TEXT,
+                verified      INTEGER DEFAULT 0,
+                active        INTEGER DEFAULT 1
             );
             CREATE TABLE IF NOT EXISTS whitelist (
                 id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,8 +93,8 @@ def init_db():
     try:
         with _conn() as con:
             con.execute(
-                "INSERT INTO users (username,email,password_hash,role,created_at) VALUES (?,?,?,?,?)",
-                ("admin", "admin@gmail.com", _hash("Admin@1234"), "admin", now)
+                "INSERT INTO users (username,email,password_hash,role,created_at,verified) VALUES (?,?,?,?,?,?)",
+                ("admin", "admin@gmail.com", _hash("Admin@1234"), "admin", now, 1)
             )
     except sqlite3.IntegrityError:
         pass
@@ -101,10 +107,13 @@ def verify_user(username: str, password: str):
             (username.strip(),)
         ).fetchone()
     if row and _verify(password, row["password_hash"]):
+        row_dict = dict(row)
+        if row_dict.get("active", 1) == 0:
+            return {"error": "Account is deactivated", "deactivated": True}
         with _conn() as con:
             con.execute("UPDATE users SET last_login=? WHERE username=?",
                         (datetime.datetime.now().isoformat(timespec="seconds"), username))
-        return dict(row)
+        return row_dict
     return None
 
 def register_user(username: str, email: str, password: str) -> dict:
@@ -114,13 +123,25 @@ def register_user(username: str, email: str, password: str) -> dict:
     try:
         with _conn() as con:
             con.execute(
-                "INSERT INTO users (username,email,password_hash,role,created_at) VALUES (?,?,?,?,?)",
-                (username.strip(), email.strip().lower(), _hash(password), "admin", now)
+                "INSERT INTO users (username,email,password_hash,role,created_at,verified) VALUES (?,?,?,?,?,?)",
+                (username.strip(), email.strip().lower(), _hash(password), "user", now, 0)
             )
         return {"ok": True}
     except sqlite3.IntegrityError as e:
         msg = "Username already exists" if "username" in str(e) else "Email already registered"
         return {"ok": False, "error": msg}
+
+def verify_user_account(username: str) -> bool:
+    """Mark a user's account as verified after successful 2FA."""
+    with _conn() as con:
+        cur = con.execute("UPDATE users SET verified=1 WHERE username=?", (username,))
+    return bool(cur.rowcount)
+
+def is_user_verified(username: str) -> bool:
+    """Check if a user has verified their account."""
+    with _conn() as con:
+        row = con.execute("SELECT verified FROM users WHERE username=?", (username,)).fetchone()
+    return row["verified"] == 1 if row else False
 
 def user_change_password(username: str, new_password: str) -> bool:
     with _conn() as con:
@@ -143,17 +164,67 @@ def get_user_by_id(user_id: int) -> dict | None:
 def get_all_users():
     """Get all users (for admin management)."""
     with _conn() as con:
-        rows = con.execute("SELECT id, username, email, role, created_at, last_login FROM users ORDER BY created_at DESC").fetchall()
+        rows = con.execute("SELECT id, username, email, role, created_at, last_login, verified, active FROM users ORDER BY created_at DESC").fetchall()
     return [dict(r) for r in rows]
 
-def update_user_role(user_id: int, new_role: str) -> bool:
+
+def get_user_by_id_internal(user_id: int) -> dict | None:
+    """Get user by ID (internal use)."""
+    with _conn() as con:
+        row = con.execute("SELECT id, username, email, role, created_at, last_login, verified, active FROM users WHERE id=?", (user_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def activate_user(user_id: int) -> dict:
+    """Activate a deactivated user account."""
+    if user_id == 1:
+        return {"ok": False, "error": "Cannot deactivate the primary admin account"}
+    with _conn() as con:
+        cur = con.execute("UPDATE users SET active=1 WHERE id=?", (user_id,))
+    if cur.rowcount == 0:
+        return {"ok": False, "error": "User not found"}
+    return {"ok": True}
+
+
+def deactivate_user(user_id: int) -> dict:
+    """Deactivate a user account."""
+    if user_id == 1:
+        return {"ok": False, "error": "Cannot deactivate the primary admin account"}
+    with _conn() as con:
+        cur = con.execute("UPDATE users SET active=0 WHERE id=?", (user_id,))
+    if cur.rowcount == 0:
+        return {"ok": False, "error": "User not found"}
+    return {"ok": True}
+
+
+def verify_user_account_admin(user_id: int) -> dict:
+    """Manually verify a user account (admin action)."""
+    with _conn() as con:
+        cur = con.execute("UPDATE users SET verified=1 WHERE id=?", (user_id,))
+    if cur.rowcount == 0:
+        return {"ok": False, "error": "User not found"}
+    return {"ok": True}
+
+
+def unverify_user_account(user_id: int) -> dict:
+    """Mark a user account as unverified (admin action)."""
+    with _conn() as con:
+        cur = con.execute("UPDATE users SET verified=0 WHERE id=?", (user_id,))
+    if cur.rowcount == 0:
+        return {"ok": False, "error": "User not found"}
+    return {"ok": True}
+
+
+def update_user_role(user_id: int, new_role: str) -> dict:
     """Update a user's role (admin only)."""
-    valid_roles = {"admin", "analyst", "viewer"}
+    valid_roles = {"admin", "user"}
     if new_role not in valid_roles:
-        return False
+        return {"ok": False, "error": "Invalid role"}
     with _conn() as con:
         cur = con.execute("UPDATE users SET role=? WHERE id=?", (new_role, user_id))
-    return bool(cur.rowcount)
+    if cur.rowcount == 0:
+        return {"ok": False, "error": "User not found"}
+    return {"ok": True}
 
 def get_user_by_email(email: str) -> dict | None:
     with _conn() as con:
@@ -188,7 +259,7 @@ def verify_reset_token(token: str) -> dict | None:
             """SELECT u.id, u.username, u.email, prt.expires_at, prt.used
                FROM password_reset_tokens prt
                JOIN users u ON u.id = prt.user_id
-               WHERE prt.token=? AND prt.used=0 AND prt.expires_at>??""",
+               WHERE prt.token=? AND prt.used=0 AND prt.expires_at>?""",
             (token, now)
         ).fetchone()
     return dict(row) if row else None
@@ -264,19 +335,43 @@ def scan_list(limit=100):
     with _conn() as con:
         rows = con.execute(
             """SELECT scan_id,timestamp,source_files,rogue_count,susp_count,
-                      total_frames,total_findings
+                      total_frames,total_findings,result_json
                FROM scans ORDER BY timestamp DESC LIMIT ?""", (limit,)
         ).fetchall()
-    return [dict(r) for r in rows]
+    result = []
+    for r in rows:
+        d = dict(r)
+        try:
+            full_result = json.loads(d.get('result_json', '{}'))
+            if isinstance(full_result, dict) and 'bssid_scores' in full_result:
+                d['bssid_list'] = list(full_result.get('bssid_scores', {}).keys())
+            else:
+                d['bssid_list'] = []
+        except:
+            d['bssid_list'] = []
+        result.append(d)
+    return result
 
 def scan_list_paged(limit=20, offset=0):
     with _conn() as con:
         rows = con.execute(
             """SELECT scan_id,timestamp,source_files,rogue_count,susp_count,
-                      total_frames,total_findings
+                      total_frames,total_findings,result_json
                FROM scans ORDER BY timestamp DESC LIMIT ? OFFSET ?""", (limit, offset)
         ).fetchall()
-    return [dict(r) for r in rows]
+    result = []
+    for r in rows:
+        d = dict(r)
+        try:
+            full_result = json.loads(d.get('result_json', '{}'))
+            if isinstance(full_result, dict) and 'bssid_scores' in full_result:
+                d['bssid_list'] = list(full_result.get('bssid_scores', {}).keys())
+            else:
+                d['bssid_list'] = []
+        except:
+            d['bssid_list'] = []
+        result.append(d)
+    return result
 
 def scan_get(scan_id):
     with _conn() as con:

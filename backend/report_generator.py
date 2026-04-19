@@ -1,6 +1,5 @@
 """
 PDF Report Generator for Rogue AP Detection System
-Meru University of Science and Technology | CT206/109336/22
 """
 
 from reportlab.lib.pagesizes import A4
@@ -84,11 +83,7 @@ def _header_block(story, styles, stats, source_files, timestamp):
     story.append(Spacer(1, 6))
 
     meta = [
-        [Paragraph(f"<b>Institution:</b> Meru University of Science and Technology", styles["small"]),
-         Paragraph(f"<b>Generated:</b> {timestamp}", styles["small"])],
-        [Paragraph(f"<b>Student:</b> Silvia Muthoni Munene | CT206/109336/22", styles["small"]),
-         Paragraph(f"<b>Supervisor:</b> Dr. Dorothy Bundi", styles["small"])],
-        [Paragraph(f"<b>Captures analysed:</b> {', '.join(source_files)}", styles["small"]),
+        [Paragraph(f"<b>Generated:</b> {timestamp}", styles["small"]),
          Paragraph(f"<b>Total frames:</b> {stats['total_frames']:,}", styles["small"])],
     ]
     mt = Table(meta, colWidths=[9.5*cm, 7.5*cm])
@@ -190,7 +185,7 @@ def _bssid_table(story, styles, bssid_scores):
             b["verdict"],
         ])
 
-    t = Table(data, colWidths=[4*cm, 4.5*cm, 1.5*cm, 2*cm, 5*cm])
+    t = Table(data, colWidths=[3.5*cm, 4*cm, 1.5*cm, 2*cm, 6*cm])
     ts = [
         ("BACKGROUND", (0,0), (-1,0), DARK_NAVY),
         ("TEXTCOLOR",  (0,0), (-1,0), WHITE),
@@ -202,6 +197,7 @@ def _bssid_table(story, styles, bssid_scores):
         ("LEFTPADDING",   (0,0), (-1,-1), 6),
         ("ROWBACKGROUNDS", (0,1), (-1,-1), [WHITE, LIGHT_GREY]),
         ("ALIGN", (2,0), (3,-1), "CENTER"),
+        ("VALIGN", (0,0), (-1,-1), "TOP"),
     ]
     for i, b in enumerate(sorted_bs, 1):
         vc = VERDICT_COLORS.get(b["verdict"], MID_BLUE)
@@ -259,7 +255,7 @@ def _methodology_page(story, styles):
     story.append(Spacer(1, 6))
     story.append(Paragraph(
         "This system implements signature-based analysis of IEEE 802.11 wireless frames "
-        "captured in a simulated campus environment. Six detection rules are applied to "
+        "captured in a monitored environment. Six detection rules are applied to "
         "identify rogue access points based on frame anomalies, SSID conflicts, and "
         "signal behaviour patterns.",
         styles["body"]
@@ -269,7 +265,7 @@ def _methodology_page(story, styles):
     rules = [
         ("SSID Spoofing", "HIGH",
          "Detects when the same SSID is advertised by more than one distinct BSSID across "
-         "captures. In a legitimate campus ESS, the same SSID may appear on multiple APs, "
+         "captures. In a legitimate ESS, the same SSID may appear on multiple APs, "
          "but a new, unrecognised BSSID advertising a known SSID is a strong evil-twin indicator."),
         ("MAC Inconsistency", "HIGH",
          "In Beacon and ProbeResponse frames the transmitter address (addr2) must equal the "
@@ -297,7 +293,7 @@ def _methodology_page(story, styles):
     for name, sev, desc in rules:
         data.append([name, sev, desc])
 
-    t = Table(data, colWidths=[3.8*cm, 2*cm, 11.2*cm])
+    t = Table(data, colWidths=[3.5*cm, 2*cm, 11.5*cm])
     sev_fill = {"HIGH": colors.HexColor("#FDEDEC"),
                 "MEDIUM": colors.HexColor("#FEF9E7"),
                 "LOW": colors.HexColor("#EAFAF1")}
@@ -359,16 +355,16 @@ def _recommendations(story, styles, stats):
     recs = []
     if stats["rogue_count"] > 0:
         recs.append(("HIGH", "Immediately isolate and investigate all ROGUE-flagged BSSIDs. "
-                              "Verify physical presence of the device on campus network infrastructure."))
+                               "Verify physical presence of the device on the network infrastructure."))
     if stats["suspicious_count"] > 0:
         recs.append(("MEDIUM", "Monitor SUSPICIOUS-flagged BSSIDs closely. "
-                               "Cross-reference against the authorised AP whitelist maintained by network administration."))
+                               "Cross-reference against the authorised AP whitelist maintained by the security team."))
     if stats["severity_counts"].get("HIGH", 0) > 0:
         recs.append(("HIGH", "Investigate all HIGH-severity SSID Spoofing and MAC Inconsistency findings "
                               "— these are strong indicators of evil twin or frame injection attacks."))
     recs.append(("LOW", "Maintain and regularly update the authorised BSSID whitelist. "
                         "Schedule periodic wireless scans at minimum every 24 hours."))
-    recs.append(("LOW", "Educate campus users to verify network authenticity before connecting "
+    recs.append(("LOW", "Educate users to verify network authenticity before connecting "
                         "and to avoid networks with unfamiliar or duplicate SSIDs."))
 
     data = [["#", "Priority", "Action"]]
@@ -385,6 +381,7 @@ def _recommendations(story, styles, stats):
         ("TOPPADDING",    (0,0), (-1,-1), 5),
         ("BOTTOMPADDING", (0,0), (-1,-1), 5),
         ("LEFTPADDING",   (0,0), (-1,-1), 6),
+        ("RIGHTPADDING",  (0,0), (-1,-1), 6),
         ("ROWBACKGROUNDS", (0,1), (-1,-1), [WHITE, LIGHT_GREY]),
         ("ALIGN", (0,0), (1,-1), "CENTER"),
         ("VALIGN", (0,0), (-1,-1), "TOP"),
@@ -401,8 +398,7 @@ def _footer(story, styles):
     story.append(HRFlowable(width="100%", thickness=0.5, color=MID_GREY))
     story.append(Spacer(1, 4))
     story.append(Paragraph(
-        "Rogue AP Detection System · Meru University of Science and Technology · "
-        "Bachelor of Science in Computer Security and Forensics · CT206/109336/22",
+        "Rogue AP Detection System",
         ParagraphStyle("footer", fontSize=7, textColor=MID_GREY, alignment=TA_CENTER)
     ))
 
@@ -419,7 +415,7 @@ def generate_pdf(result, output_path):
         leftMargin=2*cm, rightMargin=2*cm,
         topMargin=2*cm, bottomMargin=2*cm,
         title="Rogue AP Detection Report",
-        author="Silvia Muthoni Munene"
+        author="Rogue AP Detection System"
     )
 
     styles = _styles()

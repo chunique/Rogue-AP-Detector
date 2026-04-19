@@ -5,3 +5,4 @@ numpy>=1.23.0
 scikit-learn>=1.2.0
 reportlab>=4.0.0
 bcrypt>=4.0.0
+python-dotenv>=1.0.0

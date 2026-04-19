@@ -1,10 +1,5 @@
 # RogueShield — Rogue Access Point Detection System
 
-**Meru University of Science and Technology**  
-Student: Silvia Muthoni Munene | CT206/109336/22  
-Supervisor: Dr. Dorothy Bundi  
-Course: Bachelor of Science in Computer Security and Forensics
-
 ---
 
 ## Project Objectives
@@ -97,7 +92,7 @@ Navigate to: **http://localhost:5000**
 - **CSRF protection** enabled
 - **Session secure cookies** (HTTPS only when configured)
 - **Security headers** (HSTS, X-Frame-Options, etc.)
-- **Role-based access control** (admin, analyst, viewer)
+- **Role-based access control** (admin, user)
 - **Password reset** with email verification
 
 ---
@@ -107,8 +102,7 @@ Navigate to: **http://localhost:5000**
 | Role | Permissions |
 |------|------------|
 | admin | Full access to all features |
-| analyst | Can add/remove whitelist, run scans |
-| viewer | Can view results and reports only |
+| user | Can view results, run scans, view reports |
 
 ---
 

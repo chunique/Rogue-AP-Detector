@@ -68,7 +68,8 @@ let allBSSIDs=[],maxScore=1,activeFilter='all';
 })();
 function load(data){
   const {bssid_scores,source_files,timestamp}=data;
-  document.getElementById('scanMeta').textContent=`${new Date(timestamp).toLocaleString()} · ${source_files.join(', ')}`;
+  const sf=Array.isArray(source_files)?source_files.join(', '):source_files;
+  document.getElementById('scanMeta').textContent=`${new Date(timestamp).toLocaleString()} · ${sf}`;
   allBSSIDs=Object.values(bssid_scores).sort((a,b)=>b.score-a.score);
   maxScore=Math.max(...allBSSIDs.map(b=>b.score),1);
   document.getElementById('cRogue').textContent=allBSSIDs.filter(b=>b.verdict==='ROGUE').length;

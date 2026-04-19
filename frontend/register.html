@@ -5,62 +5,67 @@
 <title>RogueShield — Create Account</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root{--blue-50:#eff6ff;--blue-100:#dbeafe;--blue-500:#3b82f6;--blue-600:#2563eb;--blue-700:#1d4ed8;--slate-50:#f8fafc;--slate-100:#f1f5f9;--slate-200:#e2e8f0;--slate-300:#cbd5e1;--slate-400:#94a3b8;--slate-500:#64748b;--slate-600:#475569;--slate-700:#334155;--slate-800:#1e293b;--slate-900:#0f172a;--red-50:#fef2f2;--red-100:#fee2e2;--red-400:#f87171;--red-500:#ef4444;--red-600:#dc2626;--red-700:#b91c1c;--orange-400:#fb923c;--yellow-400:#facc15;--green-50:#f0fdf4;--green-100:#dcfce7;--green-500:#22c55e;--green-600:#16a34a;--green-700:#15803d;--border:#e2e8f0;--shadow-xl:0 20px 25px rgba(0,0,0,.10),0 10px 10px rgba(0,0,0,.04);}
+:root{
+  --bg:#1E1E1E;--surface:#2D2D2D;--surface2:#3D3D3D;--surface3:#4A4A4A;
+  --border:#404040;--accent:#4EC9B0;--accent-light:#6EE7D0;
+  --safe:#4EC9B0;--suspicious:#CE9178;--rogue:#F44747;
+  --text:#E0E0E0;--text2:#A0A0A0;--muted:#6B6B6B;
+  --radius:10px;--shadow:0 2px 8px rgba(0,0,0,0.3);
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased}
-body{background:var(--slate-100);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(var(--slate-200)1px,transparent 1px);background-size:28px 28px;opacity:.6;pointer-events:none}
+body{background:var(--bg);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;color:var(--text)}
 .auth-wrap{position:relative;z-index:1;width:100%;max-width:440px}
-.auth-brand{text-align:center;margin-bottom:24px}
-.brand-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:8px}
-.brand-icon{width:42px;height:42px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 4px 12px rgba(37,99,235,.3)}
-.brand-name{font-size:21px;font-weight:700;color:var(--slate-900);letter-spacing:-.3px}
-.brand-tagline{font-size:13px;color:var(--slate-500)}
-.auth-card{background:white;border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:var(--shadow-xl)}
-.auth-heading{font-size:20px;font-weight:700;color:var(--slate-900);margin-bottom:4px}
-.auth-sub{font-size:13px;color:var(--slate-500);margin-bottom:24px}
+.auth-brand{text-align:center;margin-bottom:28px}
+.brand-mark{display:inline-flex;align-items:center;gap:12px;margin-bottom:8px}
+.brand-icon{width:48px;height:48px;background:linear-gradient(135deg,#4EC9B0,#2E8B7A);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(78,201,176,.3)}
+.brand-name{font-size:24px;font-weight:700;color:var(--text)}
+.brand-tagline{font-size:13px;color:var(--muted);margin-top:4px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:var(--shadow)}
+.auth-heading{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-group{margin-bottom:14px}
-.form-label{display:block;font-size:13px;font-weight:500;color:var(--slate-700);margin-bottom:5px}
+.form-label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:5px}
 .input-wrap{position:relative}
-.form-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--slate-800);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit}
-.form-input:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
-.form-input.has-icon{padding-left:36px}
-.form-input.error{border-color:var(--red-400)}
-.input-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--slate-400);pointer-events:none}
-.toggle-pw{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--slate-400);font-size:12px;padding:2px 4px}
-.toggle-pw:hover{color:var(--slate-600)}
-.field-error{font-size:11.5px;color:var(--red-600);margin-top:3px;display:none}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;background:var(--surface2)}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(78,201,176,.15)}
+.form-input.has-icon{padding-left:40px}
+.form-input.error{border-color:var(--rogue)}
+.form-input::placeholder{color:var(--muted)}
+.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--muted);pointer-events:none}
+.toggle-pw{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;padding:4px 6px;border-radius:4px}
+.toggle-pw:hover{color:var(--accent)}
+.field-error{font-size:11.5px;color:var(--rogue);margin-top:4px;display:none}
 .field-error.show{display:block}
 
 /* Password strength */
-.pw-strength{margin-top:6px}
-.pw-bars{display:flex;gap:3px;height:3px;margin-bottom:3px}
-.pw-bar{flex:1;border-radius:2px;background:var(--slate-200);transition:background .25s}
-.pw-bar.weak{background:var(--red-400)}.pw-bar.fair{background:var(--orange-400)}.pw-bar.good{background:var(--yellow-400)}.pw-bar.strong{background:var(--green-500)}
-.pw-label{font-size:11px;color:var(--slate-400)}
+.pw-strength{margin-top:8px}
+.pw-bars{display:flex;gap:4px;height:4px;margin-bottom:4px}
+.pw-bar{flex:1;border-radius:2px;background:var(--surface3);transition:background .25s}
+.pw-bar.weak{background:var(--rogue)}.pw-bar.fair{background:#fb923c}.pw-bar.good{background:#facc15}.pw-bar.strong{background:var(--accent)}
+.pw-label{font-size:11px;color:var(--muted)}
 
 /* Requirements checklist */
-.req-list{margin-top:6px;display:flex;flex-direction:column;gap:3px}
-.req-item{font-size:11.5px;color:var(--slate-400);display:flex;align-items:center;gap:5px;transition:color .2s}
-.req-item.met{color:var(--green-600)}
-.req-item .req-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--slate-300);display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .2s;flex-shrink:0}
-.req-item.met .req-dot{background:var(--green-500);border-color:var(--green-500);color:white}
+.req-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.req-item{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;transition:color .2s}
+.req-item.met{color:var(--accent)}
+.req-item .req-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .2s;flex-shrink:0}
+.req-item.met .req-dot{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 
-.error-box{display:none;align-items:center;gap:8px;padding:10px 12px;background:var(--red-50);border:1px solid var(--red-100);border-radius:8px;font-size:12.5px;color:var(--red-700);margin-bottom:14px}
+.error-box{display:none;align-items:center;gap:10px;padding:12px 14px;background:rgba(244,71,71,.1);border:1px solid rgba(244,71,71,.3);border-radius:8px;font-size:13px;color:var(--rogue);margin-bottom:16px}
 .error-box.show{display:flex}
-.success-box{display:none;align-items:center;gap:8px;padding:12px 14px;background:var(--green-50);border:1px solid var(--green-100);border-radius:8px;font-size:13px;color:var(--green-700);margin-bottom:14px}
+.success-box{display:none;align-items:center;gap:8px;padding:14px 16px;background:rgba(78,201,176,.1);border:1px solid rgba(78,201,176,.3);border-radius:8px;font-size:13px;color:var(--accent);margin-bottom:16px}
 .success-box.show{display:flex}
 
-.btn-submit{width:100%;padding:11px;background:linear-gradient(135deg,var(--blue-600),var(--blue-700));color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;box-shadow:0 1px 3px rgba(37,99,235,.3)}
-.btn-submit:hover{box-shadow:0 4px 12px rgba(37,99,235,.4);transform:translateY(-1px)}
+.btn-submit{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),#2E8B7A);color:var(--bg);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;box-shadow:0 2px 8px rgba(78,201,176,.25)}
+.btn-submit:hover{box-shadow:0 4px 14px rgba(78,201,176,.35);transform:translateY(-1px)}
 .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
-.auth-footer{text-align:center;margin-top:18px;font-size:12.5px;color:var(--slate-500)}
-.auth-footer a{color:var(--blue-600);font-weight:500;text-decoration:none}
+.auth-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--muted)}
+.auth-footer a{color:var(--accent);font-weight:500;text-decoration:none}
 .auth-footer a:hover{text-decoration:underline}
-.divider{display:flex;align-items:center;gap:10px;margin:16px 0;font-size:12px;color:var(--slate-400)}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;font-size:12px;color:var(--muted)}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.page-footer{text-align:center;margin-top:18px;font-size:11px;color:var(--slate-400)}
 </style>
 </head>
 <body>
@@ -70,18 +75,18 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <div class="brand-icon">🛡</div>
       <div class="brand-name">RogueShield</div>
     </div>
-    <div class="brand-tagline">Create your administrator account</div>
+    <div class="brand-tagline">Create your account</div>
   </div>
 
   <div class="auth-card">
     <div class="auth-heading">Create account</div>
-    <div class="auth-sub">Set up your RogueShield administrator profile</div>
+    <div class="auth-sub">Set up your RogueShield profile</div>
 
     <div class="error-box"   id="errorBox"><span>⚠</span><span id="errorMsg"></span></div>
-    <div class="success-box" id="successBox"><span>✓</span><span>Account created! Redirecting to login…</span></div>
+    <div class="success-box" id="successBox"><span>✓</span><span id="successMsg">Account created! Redirecting to login…</span></div>
 
     <div class="form-group">
-      <label class="form-label">Username <span style="color:#ef4444">*</span></label>
+      <label class="form-label">Username <span style="color:var(--rogue)">*</span></label>
       <div class="input-wrap">
         <span class="input-icon">👤</span>
         <input class="form-input has-icon" id="username" type="text" placeholder="e.g. john_doe" autocomplete="username" oninput="validateUsername()"/>
@@ -90,7 +95,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     </div>
 
     <div class="form-group">
-      <label class="form-label">Email address <span style="color:#ef4444">*</span></label>
+      <label class="form-label">Email address <span style="color:var(--rogue)">*</span></label>
       <div class="input-wrap">
         <span class="input-icon">✉</span>
         <input class="form-input has-icon" id="email" type="email" placeholder="you@gmail.com" autocomplete="email" oninput="validateEmail()"/>
@@ -99,7 +104,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     </div>
 
     <div class="form-group">
-      <label class="form-label">Password <span style="color:#ef4444">*</span></label>
+      <label class="form-label">Password <span style="color:var(--rogue)">*</span></label>
       <div class="input-wrap">
         <span class="input-icon">🔒</span>
         <input class="form-input has-icon" id="password" type="password" placeholder="Create a strong password" autocomplete="new-password" oninput="checkStrength()"/>
@@ -120,7 +125,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     </div>
 
     <div class="form-group">
-      <label class="form-label">Confirm password <span style="color:#ef4444">*</span></label>
+      <label class="form-label">Confirm password <span style="color:var(--rogue)">*</span></label>
       <div class="input-wrap">
         <span class="input-icon">🔒</span>
         <input class="form-input has-icon" id="confirm" type="password" placeholder="Repeat your password" autocomplete="new-password" oninput="validateConfirm()"/>
@@ -135,9 +140,8 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
   </div>
 
   <div class="auth-footer">
-    Already have an account? <a href="/">Sign in →</a>
+    Already have an account? <a href="login.html">Sign in →</a>
   </div>
-  <div class="page-footer">Meru University of Science and Technology · CT206/109336/22</div>
 </div>
 
 <script>
@@ -162,14 +166,14 @@ function checkStrength() {
   const score = [len,up,num,pw.length>=12].filter(Boolean).length;
   const cls   = ['','weak','fair','good','strong'][score];
   const label = ['Enter a password','Weak','Fair','Good','Strong'][score];
-  const colors = {weak:'#f87171',fair:'#fb923c',good:'#facc15',strong:'#22c55e'};
+  const colors = {weak:'#f87171',fair:'#fb923c',good:'#facc15',strong:'#4EC9B0'};
   ['b1','b2','b3','b4'].forEach((id,i) => {
     const b = document.getElementById(id);
     b.className = 'pw-bar';
     if(i < score) b.classList.add(cls);
   });
   document.getElementById('pwLabel').textContent = label;
-  document.getElementById('pwLabel').style.color = colors[cls]||'#94a3b8';
+  document.getElementById('pwLabel').style.color = colors[cls]||'#6B6B6B';
   validateConfirm();
 }
 
@@ -212,12 +216,19 @@ async function doRegister() {
     const res = await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({username,email,password,confirm})});
     const data = await res.json();
-    if(res.ok){
+    if(data.ok || res.ok){
       document.getElementById('successBox').classList.add('show');
-      setTimeout(()=>window.location.href='/',2000);
-    } else { showErr(data.error||'Registration failed.'); }
-  } catch { showErr('Connection error.'); }
-  finally { btn.disabled=false; btn.textContent='Create Account'; }
+      document.getElementById('successMsg').textContent = data.message || 'Registration successful! Redirecting...';
+      document.querySelector('.auth-card').querySelectorAll('input').forEach(i => i.disabled = true);
+      btn.style.display = 'none';
+      setTimeout(()=>window.location.href='login.html',2500);
+    } else {
+      showErr(data.error || 'Registration failed. Please try again.');
+    }
+  } catch {
+    showErr('Connection error. Please check your network and try again.');
+  }
+  finally { if (!document.getElementById('successBox').classList.contains('show')) { btn.disabled=false; btn.textContent='Create Account'; } }
 }
 
 function showErr(msg){

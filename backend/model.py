@@ -1,17 +1,16 @@
 """
 rogue_ap_system/backend/model.py
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Rogue Access Point Detection Model
 Based on: "Rogue Access Point Detection Using Wireless Network Scanning
            with Signature Analysis"
-Student:  Silvia Muthoni Munene | CT206/109336/22
-MUST — Bachelor of Science in Computer Security and Forensics
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 This module is the ORIGINAL standalone detection model — the first artefact
 built for the project. It can be run directly from the command line:
 
     python model.py capture-1.csv capture-2.csv
+
 
 It is also imported by detector.py (the extended engine) which adds the
 Unknown-BSSID whitelist rule and the structured output format used by the
@@ -81,7 +80,7 @@ def detect_ssid_spoofing(df):
 
     Flag every SSID that is advertised by more than one distinct BSSID across
     all capture files.  A legitimate ESS may have multiple APs sharing an SSID,
-    but an *unknown* BSSID suddenly advertising a known campus SSID is the
+    but an *unknown* BSSID suddenly advertising a known SSID is the
     classic evil-twin signature.
     """
     ap_frames = df[
@@ -329,7 +328,6 @@ def print_report(bssid_scores, all_findings, capture_files):
     SEP = "=" * 70
     print(f"\n{SEP}")
     print("  ROGUE ACCESS POINT DETECTION REPORT")
-    print(f"  Meru University of Science and Technology | CT206/109336/22")
     print(f"  Captures analysed: {', '.join(capture_files)}")
     print(SEP)
 

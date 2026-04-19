@@ -60,12 +60,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .card-title{font-size:15px;font-weight:600}
 .card-body{padding:24px}
 
-.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.quick-btn{display:flex;align-items:center;gap:12px;padding:16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text)}
-.quick-btn:hover{border-color:var(--accent)}
-.quick-icon{font-size:24px}
-.quick-text{font-weight:500;font-size:14px}
-.quick-desc{font-size:12px;color:var(--muted);margin-top:2px}
+
 
 .rule-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
 .rule-item:last-child{border-bottom:none}
@@ -129,7 +124,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Management</div>
-        <a href="whitelist.html" class="nav-item">Access Points</a>
+        <a href="users.html" class="nav-item" id="navUsers">Users</a>
+        <a href="whitelist.html" class="nav-item" id="navAccessPoints">Access Points</a>
         <a href="reports.html" class="nav-item">Reports</a>
       </div>
     </nav>
@@ -138,7 +134,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="user-avatar" id="userAvatar">A</div>
         <div class="user-info">
           <div class="user-name" id="userName">Admin</div>
-          <div class="user-role">Administrator</div>
+          <div class="user-role" id="userRole">Administrator</div>
         </div>
         <button class="logout-btn" onclick="logout()">↩</button>
       </div>
@@ -173,29 +169,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="stat-label">Registered APs</div>
       </div>
     </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Quick Actions</div>
-        </div>
-        <div class="card-body">
-          <div class="quick-actions">
-            <a href="scan.html" class="quick-btn">
-              <span class="quick-icon">🔍</span>
-              <div><div class="quick-text">New Scan</div><div class="quick-desc">Analyze capture files</div></div>
-            </a>
-            <a href="demo.html" class="quick-btn" onclick="runDemo(event)">
-              <span class="quick-icon">📊</span>
-              <div><div class="quick-text">Run Demo</div><div class="quick-desc">Test with sample data</div></div>
-            </a>
-            <a href="whitelist.html" class="quick-btn">
-              <span class="quick-icon">🛡</span>
-              <div><div class="quick-text">Access Points</div><div class="quick-desc">Manage registered APs</div></div>
-            </a>
-          </div>
-        </div>
-      </div>
 
       <div class="card">
         <div class="card-header">
@@ -245,6 +218,12 @@ async function init(){
   if(me.error)return window.location.href='/login.html';
   document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();
   document.getElementById('userName').textContent=me.username;
+  document.getElementById('userRole').textContent=me.role==='admin'?'Administrator':'User';
+  if(me.role!=='admin'){
+    document.getElementById('navUsers').style.display='none';
+    document.getElementById('navAccessPoints').style.display='none';
+    document.getElementById('quickAP').style.display='none';
+  }
   loadSummary();
 }
 

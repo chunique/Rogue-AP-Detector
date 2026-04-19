@@ -9,6 +9,9 @@ import secrets
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
@@ -90,7 +93,7 @@ def send_password_reset_email(to_email: str, username: str, reset_link: str) -> 
             </div>
             <div class="footer">
                 <p>RogueShield — Rogue Access Point Detection System<br>
-                Meru University of Science and Technology</p>
+                </p>
             </div>
         </div>
     </body>
@@ -112,7 +115,7 @@ If you didn't request this, please ignore this email.
 
 ---
 RogueShield - Rogue Access Point Detection System
-Meru University of Science and Technology
+
     """
     
     return send_email(to_email, subject, html, text)
@@ -155,7 +158,7 @@ def send_welcome_email(to_email: str, username: str) -> bool:
             </div>
             <div class="footer">
                 <p>RogueShield — Rogue Access Point Detection System<br>
-                Meru University of Science and Technology</p>
+                </p>
             </div>
         </div>
     </body>
@@ -208,7 +211,7 @@ def send_2fa_code(to_email: str, username: str, code: str) -> bool:
             </div>
             <div class="footer">
                 <p>RogueShield — Rogue Access Point Detection System<br>
-                Meru University of Science and Technology</p>
+                </p>
             </div>
         </div>
     </body>
@@ -230,7 +233,139 @@ If you did not attempt to log in, someone may be trying to access your account. 
 
 ---
 RogueShield — Rogue Access Point Detection System
-Meru University of Science and Technology
+
+    """
+    
+    return send_email(to_email, subject, html, text)
+
+def send_account_approved_email(to_email: str, username: str) -> bool:
+    """Send account approval notification email to newly approved users."""
+    subject = "RogueShield - Your Account Has Been Approved"
+    
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {{ font-family: 'Inter', Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }}
+            .container {{ max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+            .header {{ background: linear-gradient(135deg, #0066ff, #00c8ff); padding: 30px; text-align: center; }}
+            .header h1 {{ color: #ffffff; margin: 0; font-size: 24px; }}
+            .content {{ padding: 40px 30px; }}
+            .content h2 {{ color: #333333; margin-top: 0; }}
+            .content p {{ color: #666666; line-height: 1.6; }}
+            .success-box {{ background: #d4edda; border: 1px solid #28a745; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; }}
+            .success-icon {{ font-size: 48px; margin-bottom: 10px; }}
+            .success-text {{ color: #155724; font-size: 18px; font-weight: 600; }}
+            .footer {{ background: #f8f9fa; padding: 20px 30px; text-align: center; color: #999999; font-size: 12px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>RogueShield</h1>
+            </div>
+            <div class="content">
+                <h2>Account Approved!</h2>
+                <p>Hello <strong>{username}</strong>,</p>
+                <p>Great news! Your RogueShield account has been approved by the administrator.</p>
+                <div class="success-box">
+                    <div class="success-icon">✓</div>
+                    <div class="success-text">Your account is now active!</div>
+                </div>
+                <p>You can now log in to RogueShield with your credentials and start using the system.</p>
+                <p>If you have any questions, please contact your system administrator.</p>
+            </div>
+            <div class="footer">
+                <p>RogueShield — Rogue Access Point Detection System<br>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    text = f"""
+RogueShield - Account Approved!
+
+Hello {username},
+
+Great news! Your RogueShield account has been approved by the administrator.
+
+You can now log in to RogueShield with your credentials and start using the system.
+
+If you have any questions, please contact your system administrator.
+
+---
+RogueShield — Rogue Access Point Detection System
+    """
+    
+    return send_email(to_email, subject, html, text)
+
+def send_registration_received_email(to_email: str, username: str) -> bool:
+    """Send email confirming registration is pending admin approval."""
+    subject = "RogueShield - Registration Received"
+    
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {{ font-family: 'Inter', Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }}
+            .container {{ max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+            .header {{ background: linear-gradient(135deg, #f39c12, #e67e22); padding: 30px; text-align: center; }}
+            .header h1 {{ color: #ffffff; margin: 0; font-size: 24px; }}
+            .content {{ padding: 40px 30px; }}
+            .content h2 {{ color: #333333; margin-top: 0; }}
+            .content p {{ color: #666666; line-height: 1.6; }}
+            .info-box {{ background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; margin: 20px 0; }}
+            .info-icon {{ font-size: 48px; margin-bottom: 10px; text-align: center; }}
+            .footer {{ background: #f8f9fa; padding: 20px 30px; text-align: center; color: #999999; font-size: 12px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>RogueShield</h1>
+            </div>
+            <div class="content">
+                <h2>Registration Received</h2>
+                <p>Hello <strong>{username}</strong>,</p>
+                <p>Thank you for registering with RogueShield!</p>
+                <div class="info-box">
+                    <div class="info-icon">⏳</div>
+                    <p style="margin:0; text-align:center;"><strong>Your account is pending approval.</strong></p>
+                    <p style="margin:10px 0 0 0; text-align:center; color:#856404;">An administrator will review your registration and approve your account. You will receive an email once your account is activated.</p>
+                </div>
+                <p>You will be able to log in once your account has been approved.</p>
+                <p>If you have any questions, please contact your system administrator.</p>
+            </div>
+            <div class="footer">
+                <p>RogueShield — Rogue Access Point Detection System<br>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    text = f"""
+RogueShield - Registration Received
+
+Hello {username},
+
+Thank you for registering with RogueShield!
+
+Your account is pending approval. An administrator will review your registration and approve your account. You will receive an email once your account is activated.
+
+You will be able to log in once your account has been approved.
+
+If you have any questions, please contact your system administrator.
+
+---
+RogueShield — Rogue Access Point Detection System
     """
     
     return send_email(to_email, subject, html, text)

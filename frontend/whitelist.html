@@ -122,6 +122,7 @@ tr:hover td{background:rgba(78,201,176,0.03)}
         <div class="nav-section-title">Management</div>
         <a href="whitelist.html" class="nav-item active">Access Points</a>
         <a href="reports.html" class="nav-item">Reports</a>
+        <a href="users.html" class="nav-item" id="usersNav" style="display:none">Users</a>
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -129,7 +130,7 @@ tr:hover td{background:rgba(78,201,176,0.03)}
         <div class="user-avatar" id="userAvatar">A</div>
         <div class="user-info">
           <div class="user-name" id="userName">Admin</div>
-          <div class="user-role">Administrator</div>
+          <div class="user-role" id="userRoleDisplay">User</div>
         </div>
         <button class="logout-btn" onclick="logout()">↩</button>
       </div>
@@ -194,14 +195,14 @@ tr:hover td{background:rgba(78,201,176,0.03)}
 <div class="toast" id="toast"></div>
 
 <script>
-let accessPoints=[],filteredAPs=[],currentPage=1,perPage=15;
+let accessPoints=[],filteredAPs=[],currentPage=1,perPage=15,userRole='user';
 const api=(path,opts={})=>{const method=opts.method||'GET';const body=opts.body?JSON.stringify(opts.body):undefined;return fetch(path,{method,headers:{'Content-Type':'application/json',...opts.headers},credentials:'include',body}).then(async r=>{const t=await r.text();try{return JSON.parse(t)}catch{return{error:t}}})};
-(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;loadAPs();})();
+(async()=>{const me=await api('/api/me');if(me.error){window.location.href='/login.html';return;}userRole=me.role;document.getElementById('userAvatar').textContent=me.username[0].toUpperCase();document.getElementById('userName').textContent=me.username;document.getElementById('userRoleDisplay').textContent=me.role==='admin'?'Administrator':'User';if(me.role!=='admin'){document.querySelector('.btn-primary[onclick="openModal()"]').style.display='none';}else{document.getElementById('usersNav').style.display='';}loadAPs();})();
 function logout(){api('/api/logout',{method:'POST'});window.location.href='/login.html';}
 
 async function loadAPs(){showLoading(true);try{const d=await api('/api/access-points?per_page=100');accessPoints=d.data||[];filteredAPs=[...accessPoints];document.getElementById('totalAPs').textContent=accessPoints.length;document.getElementById('verifiedAPs').textContent=accessPoints.length;document.getElementById('unverifiedAPs').textContent='0';renderTable();}catch(e){toast('Failed to load access points','error');}finally{showLoading(false);}}
 
-function renderTable(){const start=(currentPage-1)*perPage,end=start+perPage,pageAPs=filteredAPs.slice(start,end);const tbody=document.getElementById('apTable');if(!pageAPs.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">No access points registered</td></tr>';document.getElementById('pagination').innerHTML='';return;}tbody.innerHTML=pageAPs.map(ap=>`<tr><td class="mono">${ap.bssid}</td><td>${ap.ssid||'—'}</td><td>${ap.label||ap.ssid||'—'}</td><td>${ap.location||'—'}</td><td style="color:var(--muted)">${new Date(ap.added_at).toLocaleDateString()}</td><td><button class="btn btn-danger btn-sm" onclick="deleteAP('${ap.bssid}')">🗑</button></td></tr>`).join('');renderPagination();}
+function renderTable(){const start=(currentPage-1)*perPage,end=start+perPage,pageAPs=filteredAPs.slice(start,end);const tbody=document.getElementById('apTable');if(!pageAPs.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">No access points registered</td></tr>';document.getElementById('pagination').innerHTML='';return;}let html='';pageAPs.forEach(ap=>{const del=userRole==='admin'?'<button class="btn btn-danger btn-sm" onclick="deleteAP(\''+ap.bssid+'\')">🗑</button>':'—';html+='<tr><td class="mono">'+ap.bssid+'</td><td>'+(ap.ssid||'—')+'</td><td>'+(ap.label||ap.ssid||'—')+'</td><td>'+(ap.location||'—')+'</td><td style="color:var(--muted)">'+new Date(ap.added_at).toLocaleDateString()+'</td><td>'+del+'</td></tr>';});tbody.innerHTML=html;renderPagination();}
 
 function renderPagination(){const totalPages=Math.ceil(filteredAPs.length/perPage);const pg=document.getElementById('pagination');if(totalPages<=1){pg.innerHTML='';return;}pg.innerHTML=`<button ${currentPage<=1?'disabled':''} onclick="goPage(${currentPage-1})">←</button><span>Page ${currentPage} of ${totalPages}</span><button ${currentPage>=totalPages?'disabled':''} onclick="goPage(${currentPage+1})">→</button>`;}
 function goPage(p){currentPage=p;renderTable();}
